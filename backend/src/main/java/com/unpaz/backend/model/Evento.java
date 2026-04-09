@@ -19,41 +19,10 @@ public class Evento {
     private String titulo;
     private String tipo;
     private String descripcion;
+    private Locacion locacion;
     // separar en interfaz el buscar por evento
 
 
-    // setters y getters -> 
-    public Long getEventoId() {
-        return eventoId;
-    }
-
-    public void setEventoId(Long eventoId) {
-        this.eventoId = eventoId;
-    }
-
-    public String getTitulo() {
-        return titulo;
-    }
-
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
+   
 
 }
