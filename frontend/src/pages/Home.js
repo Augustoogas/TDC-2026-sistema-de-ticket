@@ -1,117 +1,248 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Container, Typography, Grid, Card, CardMedia, 
-  CardContent, CardActionArea, TextField, Box, CircularProgress 
+import heroImage from '../assets/images/hero.jpg';
+
+import {
+  Container,
+  Typography,
+  Card,
+  CardMedia,
+  CardContent,
+  CardActionArea,
+  Box,
+  CircularProgress,
+  Button,
 } from '@mui/material';
+
 import { EventService } from '../services/api';
 
 const Home = () => {
   const navigate = useNavigate();
+
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
 
+  const scrollRef = useRef(null);
+
+  // FETCH EVENTOS
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        setLoading(true);
         const data = await EventService.getAllEvents();
         setEventos(data);
       } catch (error) {
-        console.error("Error cargando eventos:", error);
+        console.error('Error cargando eventos:', error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchEvents();
   }, []);
 
-  const eventosFiltrados = eventos.filter(evento =>
-    evento.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // SCROLL HORIZONTAL
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-        <CircularProgress sx={{ color: 'var(--bordo-medio)' }} />
-      </Box>
-    );
-  }
+    const handleWheel = (e) => {
+      if (container.scrollWidth > container.clientWidth) {
+        e.preventDefault();
+        container.scrollBy({
+          left: e.deltaY * 10,
+          behavior: 'smooth',
+        });
+      }
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, [loading]);
+
+  const eventosDestacados = eventos.slice(0, 6);
 
   return (
-    <Container maxWidth="lg" sx={{ pt: 12, pb: 5 }}> {/* pt: 12 empuja todo debajo del header */}
-      
-      <Typography variant="h3" align="center" gutterBottom sx={{ color: 'white', fontWeight: 'bold', mb: 4 }}>
-        Cartelera SITU
-      </Typography>
+    <Container maxWidth="lg" sx={{ py: 6 }}>
+      {/* HERO */}
+      <Box
+        sx={(theme) => ({
+          position: 'relative',
+          mb: 10,
+          py: { xs: 6, md: 10 },
+          px: 2,
+          textAlign: 'center',
+          overflow: 'hidden',
+          isolation: 'isolate',
 
-      <Box sx={{ mb: 6, display: 'flex', justifyContent: 'center' }}>
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Buscar espectáculo..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ 
-            maxWidth: '600px', 
-            bgcolor: 'white', 
-            borderRadius: '8px',
-          }}
-        />
+          // IMAGEN
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `url(${heroImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'brightness(0.35)',
+            transform: 'scale(1.1)',
+
+            maskImage:
+              'radial-gradient(circle at center, black 55%, transparent 100%)',
+            WebkitMaskImage:
+              'radial-gradient(circle at center, black 55%, transparent 100%)',
+          },
+
+          // OVERLAY
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            background: `
+              linear-gradient(to bottom, ${theme.palette.background.default} 0%, transparent 40%),
+              linear-gradient(to top, ${theme.palette.background.default} 0%, transparent 40%),
+              linear-gradient(to right, ${theme.palette.background.default} 0%, transparent 20%),
+              linear-gradient(to left, ${theme.palette.background.default} 0%, transparent 20%)
+            `,
+          },
+
+          '& > *': {
+            position: 'relative',
+            zIndex: 1,
+          },
+        })}
+      >
+        <Typography
+          variant="overline"
+          sx={(theme) => ({
+            color: theme.palette.primary.main,
+            letterSpacing: 1.5,
+            fontWeight: 600,
+          })}
+        >
+          NUEVOS EVENTOS CADA SEMANA
+        </Typography>
+
+        <Typography variant="h2" sx={{ mt: 1, mb: 2, fontWeight: 800 }}>
+          Descubrí experiencias únicas
+        </Typography>
+
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ maxWidth: 600, mx: 'auto' }}
+        >
+          Explorá shows, conciertos y eventos exclusivos en un solo lugar.
+        </Typography>
       </Box>
 
-      <Grid container spacing={4}>
-        {eventosFiltrados.map((evento) => (
-          <Grid item key={evento.id_evento} xs={12} sm={6} md={4}>
-            <Card sx={{ 
-              bgcolor: '#1a1a1a', 
-              color: 'white', 
-              height: '100%', 
-              display: 'flex', 
-              flexDirection: 'column',
-              borderRadius: '16px',
-              border: '1px solid #333',
-              overflow: 'hidden'
-            }}>
-              <CardActionArea onClick={() => navigate(`/evento/${evento.id_evento}`)}>
-                <Box sx={{ position: 'relative', paddingTop: '56.25%' }}> {/* Esto crea un ratio 16:9 perfecto */}
-                  <CardMedia
-                    component="img"
-                    image={evento.imagen || "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=500"}
-                    alt={evento.nombre}
-                    sx={{ 
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover' // Esto hace que la imagen no se deforme
-                    }}
-                  />
-                </Box>
-                <CardContent sx={{ p: 3 }}>
-                  <Typography variant="h5" sx={{ color: 'var(--bordo-medio)', fontWeight: 'bold', mb: 1 }}>
-                    {evento.nombre}
-                  </Typography>
-                  <Typography variant="subtitle2" sx={{ color: 'grey.500', mb: 2 }}>
-                    {evento.fecha}
-                  </Typography>
-                  <Typography variant="body2" sx={{ 
-                    color: 'grey.300',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden'
-                  }}>
-                    {evento.descripcion}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+      {/* EVENTOS */}
+      <Box>
+        <Typography variant="h4" sx={{ mb: 3, ml: 2 }}>
+          Eventos destacados
+        </Typography>
+
+        {/* No bloquea la página si no hay eventos */}
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress color="primary" />
+          </Box>
+        ) : (
+          <Box
+            ref={scrollRef}
+            sx={{
+              display: 'flex',
+              gap: 3,
+              overflowX: 'auto',
+              px: 1,
+              py: 1.5,
+              pb: 2,
+              scrollbarWidth: 'none',
+              '&::-webkit-scrollbar': { display: 'none' },
+            }}
+          >
+            {eventosDestacados.map((evento, index) => (
+              <Card
+                key={evento.id_evento}
+                sx={{
+                  minWidth: 260,
+                  maxWidth: 260,
+                  flexShrink: 0,
+                  ml: index === 0 ? 1 : 0,
+                }}
+              >
+                <CardActionArea
+                  onClick={() => navigate(`/event/${evento.id_evento}`)}
+                >
+                  <Box sx={{ position: 'relative', pt: '56.25%' }}>
+                    <CardMedia
+                      component="img"
+                      image={
+                        evento.imagen ||
+                        'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=500'
+                      }
+                      alt={evento.nombre}
+                      sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                    />
+                  </Box>
+
+                  <CardContent>
+                    <Typography variant="h6">{evento.nombre}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {evento.fecha}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            ))}
+          </Box>
+        )}
+
+        {/* CTA */}
+        <Box
+          sx={(theme) => ({
+            mt: 10,
+            p: { xs: 4, md: 6 },
+            textAlign: 'center',
+            borderRadius: 4,
+
+            background: theme.palette.background.paper,
+            border: `1px solid ${theme.palette.custom.cardBorder}`,
+
+            transition: '0.25s',
+
+            '&:hover': {
+              borderColor: theme.palette.primary.main,
+            },
+          })}
+        >
+          <Typography variant="h4" sx={{ mb: 2 }}>
+            ¿Listo para tu próximo evento?
+          </Typography>
+
+          <Typography
+            color="text.secondary"
+            sx={{ mb: 4, maxWidth: 500, mx: 'auto' }}
+          >
+            Explorá todos los eventos disponibles y encontrá la experiencia perfecta.
+          </Typography>
+
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => navigate('/events')}
+          >
+            Explorar eventos
+          </Button>
+        </Box>
+      </Box>
     </Container>
   );
 };
