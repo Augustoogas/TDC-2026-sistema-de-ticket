@@ -1,6 +1,6 @@
 package com.unpaz.backend.model;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,12 +11,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Ticket {
 	
-	private int ticketId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int ticketId;
 	
-	private float precio;
+    private float precio;
 	
-	private Evento evento;
-	
-	
-
+    @ManyToOne // Un evento puede tener muchos tickets vendidos
+    @JoinColumn(name = "id_evento")
+    private Evento evento;
 }
