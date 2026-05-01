@@ -4,13 +4,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.unpaz.backend.model.Evento;
-import com.unpaz.backend.repository.IEventoRepository;
+import com.unpaz.backend.repository.EventoRepository;
 
 @Service
 public class EventoService implements IEventoEscrituraService, IEventoLecturaService{
 
     @Autowired
-    private IEventoRepository eventoRepository;
+    private EventoRepository eventoRepository;
 
     /// Metodos de lectura
     @Override
