@@ -1,48 +1,58 @@
 import React from 'react';
-import { Paper, Typography, Tooltip } from '@mui/material';
+import { Paper, Typography, Tooltip, useTheme, alpha } from '@mui/material';
 import ChairIcon from '@mui/icons-material/Chair';
 
 const Seat = ({ id, status, onToggle, customColor }) => {
-  const isOccupied = status === 'occupied';
-  const isSelected = status === 'selected';
+  const theme = useTheme();
 
+  const isSelected = status === 'selected';
+  const isOccupied = status === 'occupied';
 
   const getBgColor = () => {
-    if (isOccupied) return 'grey.400';
-    if (isSelected) return 'primary.main'; 
-    return customColor; 
+    if (isOccupied) return theme.palette.grey[500];
+    if (isSelected) return customColor;
+    return customColor;
   };
 
   return (
-    <Tooltip title={isOccupied ? "Ocupado" : `Asiento ${id}`}>
+    <Tooltip title={isOccupied ? 'Ocupado' : `Asiento ${id}`}>
       <Paper
-        elevation={isSelected ? 6 : 1}
         onClick={() => !isOccupied && onToggle(id)}
         sx={{
-          width: 45,
-          height: 45,
+          width: 42,
+          height: 42,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
           justifyContent: 'center',
+          alignItems: 'center',
           cursor: isOccupied ? 'not-allowed' : 'pointer',
-          borderRadius: '8px 8px 15px 15px',
-          transition: '0.3s all ease',
-          // APLICACIÓN DE COLORES
+          transition: 'all 0.2s ease',
+
           bgcolor: getBgColor(),
-          color: isSelected ? 'white' : (isOccupied ? 'grey.600' : 'black'),
-          border: '1px solid',
-          borderColor: 'rgba(0,0,0,0.1)',
+
+          border: isSelected
+            ? `2.5px solid ${theme.palette.primary.main}`
+            : `1px solid ${theme.palette.divider}`,
+
+          boxShadow: isSelected
+            ? `0 0 12px ${alpha(theme.palette.primary.main, 0.4)}, inset 0 0 8px ${alpha(theme.palette.primary.main, 0.2)}`
+            : 'none',
+
+          opacity: isOccupied ? 0.6 : 1,
+
           '&:hover': {
-            transform: isOccupied ? 'none' : 'scale(1.1)',
-            filter: isOccupied ? 'none' : 'brightness(1.2)',
-          }
+            transform: isOccupied ? 'none' : 'scale(1.08)',
+            boxShadow:
+              !isOccupied && !isSelected
+                ? `0 0 8px ${alpha(customColor, 0.4)}`
+                : isSelected
+                  ? `0 0 14px ${alpha(theme.palette.primary.main, 0.5)}, inset 0 0 8px ${alpha(theme.palette.primary.main, 0.2)}`
+                  : 'none',
+          },
         }}
       >
         <ChairIcon fontSize="small" />
-        <Typography variant="caption" sx={{ fontSize: '0.6rem', fontWeight: 'bold' }}>
-          {id}
-        </Typography>
+        <Typography sx={{ fontSize: 9, fontWeight: 600 }}>{id}</Typography>
       </Paper>
     </Tooltip>
   );
