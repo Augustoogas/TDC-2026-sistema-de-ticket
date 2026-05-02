@@ -1,6 +1,8 @@
 package com.unpaz.backend.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.unpaz.backend.dto.ReservaDTO;
@@ -21,11 +23,21 @@ public class ReservaServiceImp implements IReservaService {
 
     private final static int MINUTOS_EXPRIRACION = 15;
 
+    
+    @Override
+    public List<ReservaDTO> listarTodas() {
+        
+        List<Reserva> reservas = reservaRepo.findAll();
+        
+        return reservas.stream()
+                       .map(this::mapearDTO)
+                       .collect(Collectors.toList());
+    }
+
     @Override
     @Transactional
     public ReservaDTO crearReservaTemporal(ReservaDTO reservadto, Long clienteId) {
-        // validar antes.
-        validarDatosEntrada(reservadto, clienteId); //
+        validarDatosEntrada(reservadto, clienteId);
         
         Usuario usuario = user.findById(clienteId)
             .orElseThrow(() -> new RuntimeException("Cliente no encontrado con ID: " + clienteId));
@@ -43,7 +55,6 @@ public class ReservaServiceImp implements IReservaService {
     }
 
     private void validarDatosEntrada(ReservaDTO reservadto, Long clienteId){
-        // validaciones
         if(clienteId == null){
             throw new RuntimeException("El ID del cliente es oblgatorio.");
         }
@@ -59,7 +70,6 @@ public class ReservaServiceImp implements IReservaService {
         LocalDateTime ahora = LocalDateTime.now();
         
         Reserva reserva = new Reserva();
-        //seteamos la informacion de la reserva
         reserva.setCliente(cliente);
         reserva.setEvento(evento);
         reserva.setMontoTotal(reservadto.getMontoTotal());

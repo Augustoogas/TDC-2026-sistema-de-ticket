@@ -1,6 +1,8 @@
 package com.unpaz.backend.controller;
 
 import com.unpaz.backend.model.Ticket;
+
+
 import com.unpaz.backend.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +26,7 @@ public class TicketController {
 
     // Obtener un ticket por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Ticket> getTicketById(@PathVariable int id) {
+    public ResponseEntity<Ticket> getTicketById(@PathVariable Long id) {
         return ticketRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
