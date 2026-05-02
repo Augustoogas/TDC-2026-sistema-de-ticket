@@ -37,7 +37,12 @@
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-
+		<!-- Swagger / OpenAPI para documentacion de la API REST -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.5.0</version>
+		</dependency>
 		<!-- PostgreSQL (Lo dejamos por si despues queres usarlo) -->
 		<dependency>
 			<groupId>org.postgresql</groupId>

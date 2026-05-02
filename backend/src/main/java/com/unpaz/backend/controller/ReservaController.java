@@ -1,31 +1,33 @@
 package com.unpaz.backend.controller;
+
+import com.unpaz.backend.dto.ReservaDTO;
+import com.unpaz.backend.service.IReservaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.unpaz.backend.model.Reserva;
-import com.unpaz.backend.repository.ReservaRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/reservas")
+@RequestMapping("/api/reservas") // 
+@CrossOrigin(origins = "*")
 public class ReservaController {
 
     @Autowired
-    private ReservaRepository reservaRepository;
+    private IReservaService reservaservice;
 
+    // Tu método GET adaptado al Service de tu compañero
     @GetMapping
-    public List<Reserva> getAllReservas() {
-        return reservaRepository.findAll();
+    public ResponseEntity<List<ReservaDTO>> getAllReservas() {
+        
+        List<ReservaDTO> lista = reservaservice.listarTodas(); 
+        return ResponseEntity.ok(lista);
     }
 
-    @PostMapping
-    public Reserva createReserva(@RequestBody Reserva reserva) {
-        // Podés setear la fecha de creación automáticamente si no viene en el JSON
-        if (reserva.getFechaCreacion() == null) {
-            reserva.setFechaCreacion(LocalDateTime.now());
-        }
-        return reservaRepository.save(reserva);
+    // 
+    @PostMapping("/{clienteId}")
+    public ResponseEntity<ReservaDTO> crear(@RequestBody ReservaDTO dto, @PathVariable Long clienteId) {
+        ReservaDTO respuesta = reservaservice.crearReservaTemporal(dto, clienteId);
+        return ResponseEntity.ok(respuesta);
     }
 }
