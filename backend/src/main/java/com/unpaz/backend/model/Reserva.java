@@ -18,13 +18,13 @@ public class Reserva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne 
     @JoinColumn(name = "cliente_id")
-    private Cliente cliente; // En lugar de Long usuarioId
+    private Cliente cliente; 
 
-    @ManyToOne
+    @ManyToOne 
     @JoinColumn(name = "evento_id")
-    private Evento evento;   // En lugar de Long eventoId
+    private Evento evento;  
 
     private Double montoTotal;
     
