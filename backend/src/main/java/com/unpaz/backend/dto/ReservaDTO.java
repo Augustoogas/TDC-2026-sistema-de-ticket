@@ -1,8 +1,11 @@
 package com.unpaz.backend.dto;
 
 import lombok.Data;
+
 import java.time.LocalDateTime;
+
 import com.unpaz.backend.model.EstadoReserva;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
@@ -16,10 +19,17 @@ public class ReservaDTO {
 
     @Schema(description = "ID del evento", example = "1")
     private Long eventoId;
-    
-    @Schema(description = "Asientos bloqueados", example = "Sector C - 12, 13")
-    private String detalleAsientos;
 
+    @Schema(description = "ID del sector", example = "1")
+    private Long sectorId;
+    
+    @Schema(description = "Nombre del sector", example = "VIP")
+    private String nombreSector;
+
+    @Schema(description = "Cantidad de entradas", example = "3")
+    private int cantidadEntradas;
+    
+    @Schema(description = "Monto total", example = "15000")
     private Double montoTotal;
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY)
@@ -27,7 +37,4 @@ public class ReservaDTO {
 
     @Schema(description = "Vencimiento de la reserva temporal")
     private LocalDateTime fechaExpiracion;
-
-
-
 }

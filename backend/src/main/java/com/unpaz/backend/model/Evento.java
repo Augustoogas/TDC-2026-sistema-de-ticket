@@ -22,4 +22,5 @@ public class Evento {
     @ManyToOne // Agregamos esto para que no tire el error de Locacion
     @JoinColumn(name = "locacion_evento_id")
     private Locacion locacion;
+
 }

@@ -13,3 +13,15 @@ INSERT INTO evento (titulo, tipo, descripcion, admin_id, locacion_evento_id) VAL
 -- 3. Una Reserva previa (Estado PAGADA para poder emitir ticket)
 INSERT INTO reserva (cliente_id, evento_id, monto_total, estado, fecha_creacion) 
 VALUES (1, 1, 5000.0, 'PAGADA', CURRENT_TIMESTAMP);
+
+
+-- para poder probar la reserva (req 12)
+INSERT INTO usuario (nombre, email, contrasenia) VALUES ('Lucia Soto', 'lucia@test.com', '1234');
+INSERT INTO cliente (usuario_id) VALUES (3);
+
+INSERT INTO locacion (nombre, direccion, capacidad) VALUES ('Microestadio UNPAZ', 'José C. Paz', 500);
+
+INSERT INTO sector (sector_id, nombre, capacidad, disponibles, locacion_id) VALUES (1, 'VIP', 100, 100, 1);
+INSERT INTO sector (sector_id, nombre, capacidad, disponibles, locacion_id) VALUES (2, 'Campo', 400, 400, 1);
+-- En vez de sector = campo, si se mantiene el front con los asientos quizas convendria mandar "Fila A", etc.
+INSERT INTO evento (titulo, tipo, descripcion, locacion_evento_id) VALUES ('Coldplay', 'Concierto', 'Prueba RF12', 1);

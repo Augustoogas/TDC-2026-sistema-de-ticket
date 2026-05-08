@@ -2,6 +2,11 @@ package com.unpaz.backend.controller;
 
 import com.unpaz.backend.dto.ReservaDTO;
 import com.unpaz.backend.service.IReservaService;
+import com.unpaz.backend.model.*;
+import com.unpaz.backend.repository.SectorRepository;
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +20,13 @@ public class ReservaController {
 
     @Autowired
     private IReservaService reservaservice;
+    private SectorRepository sectorRepo;
+    
+    // constructor para evitar el error nullpointerexc
+    public ReservaController(IReservaService reservaService, SectorRepository sectorRepo){
+        this.reservaservice = reservaService;
+        this.sectorRepo = sectorRepo;
+    }
 
     // Tu método GET adaptado al Service de tu compañero
     @GetMapping
@@ -26,8 +38,16 @@ public class ReservaController {
 
     // 
     @PostMapping("/{clienteId}")
-    public ResponseEntity<ReservaDTO> crear(@RequestBody ReservaDTO dto, @PathVariable Long clienteId) {
+    public ResponseEntity<ReservaDTO> crear(@Valid @RequestBody ReservaDTO dto, @PathVariable Long clienteId) {
         ReservaDTO respuesta = reservaservice.crearReservaTemporal(dto, clienteId);
         return ResponseEntity.ok(respuesta);
     }
+
+    // para ver lo de sectores (solo prueba) -- separalo en su propio controller 
+    @GetMapping("/sector/{id}")
+    public ResponseEntity<Sector> obtenerSector(@PathVariable Long id){
+        Sector sector = sectorRepo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Sector no encontrado"));
+            return ResponseEntity.ok(sector);
+}
 }
