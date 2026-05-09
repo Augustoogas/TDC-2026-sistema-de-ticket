@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Typography, Tabs, Tab, useTheme } from '@mui/material';
 import { AdminService, EventService } from '../services/api';
 import EventDialog from '../components/admin/dialog/EventDialog';
@@ -7,24 +7,24 @@ import CategoriaDialog from '../components/admin/dialog/CategoriaDialog';
 import SalaDialog from '../components/admin/dialog/SalaDialog';
 import EventsTab from '../components/admin/tabs/EventsTab';
 import SalasTab from '../components/admin/tabs/SalasTab';
-import UsuariosTab from '../components/admin/tabs/UsuariosTab';
+import UsersTab from '../components/admin/tabs/UsersTab';
 import CategoriasTab from '../components/admin/tabs/CategoriasTab';
 
 const AdminPanel = () => {
   const theme = useTheme();
   const [tab, setTab] = useState(0);
-  const [teatros, setTeatros] = useState([]);
+  const [salas, setSalas] = useState([]);
   const [events, setEvents] = useState([]);
   const [users, setUsers] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const [openTeatro, setOpenTeatro] = useState(false);
+  const [openSala, setOpenSala] = useState(false);
   const [openEvent, setOpenEvent] = useState(false);
   const [openUser, setOpenUser] = useState(false);
   const [openCat, setOpenCat] = useState(false);
 
-  const [teatroForm, setTeatroForm] = useState({ id: null, nombre: '', filas: [] });
+  const [salaForm, setSalaForm] = useState({ id: null, nombre: '', filas: [] });
   const [eventForm, setEventForm] = useState({
     id_evento: null,
     nombre: '',
@@ -32,7 +32,7 @@ const AdminPanel = () => {
     horaStr: '',
     descripcion: '',
     imagen: '',
-    teatroId: '',
+    salaId: '',
   });
   const [userForm, setUserForm] = useState({
     id: null,
@@ -47,26 +47,39 @@ const AdminPanel = () => {
     color: theme.palette.primary.main,
   });
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const loadData = async () => {
-    const [t, e, u, c] = await Promise.all([
-      EventService.getTeatros(),
+    const [s, e, u, c] = await Promise.all([
+      EventService.getSalas(),
       EventService.getAllEvents(),
       AdminService.getUsers(),
       EventService.getCategorias(),
     ]);
-    setTeatros(t);
+    setSalas(s);
     setEvents(e);
     setUsers(u);
     setCategorias(c);
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const [s, e, u, c] = await Promise.all([
+        EventService.getSalas(),
+        EventService.getAllEvents(),
+        AdminService.getUsers(),
+        EventService.getCategorias(),
+      ]);
+      setSalas(s);
+      setEvents(e);
+      setUsers(u);
+      setCategorias(c);
+    };
+
+    fetchData();
+  }, []);
+
   const closeModals = () => {
     setOpenEvent(false);
-    setOpenTeatro(false);
+    setOpenSala(false);
     setOpenUser(false);
     setOpenCat(false);
     setErrorMsg('');
@@ -88,8 +101,8 @@ const AdminPanel = () => {
     loadData();
   };
 
-  const handleDeleteTeatro = async (id) => {
-    await EventService.deleteTeatro(id);
+  const handleDeleteSala = async (id) => {
+    await EventService.deleteSala(id);
     loadData();
   };
 
@@ -130,11 +143,11 @@ const AdminPanel = () => {
       return match ? match[1] : '';
     };
 
-    let idEncontrado = e.teatroId || e.id_teatro || '';
+    let idEncontrado = e.salaId || e.id_sala || '';
 
-    if (!idEncontrado && teatros.length > 0) {
-      const coincidencia = teatros.find((t) =>
-        e.nombre.toLowerCase().includes(t.nombre.toLowerCase())
+    if (!idEncontrado && salas.length > 0) {
+      const coincidencia = salas.find((s) =>
+        e.nombre.toLowerCase().includes(s.nombre.toLowerCase())
       );
       if (coincidencia) idEncontrado = coincidencia.id;
     }
@@ -146,7 +159,7 @@ const AdminPanel = () => {
       horaStr: parseHoraAmigable(e.fecha || e.horaStr || ''),
       descripcion: e.descripcion || '',
       imagen: e.imagen || '',
-      teatroId: idEncontrado,
+      salaId: idEncontrado,
     });
 
     setOpenEvent(true);
@@ -159,7 +172,7 @@ const AdminPanel = () => {
       !eventForm.nombre?.trim() ||
       !eventForm.fechaStr ||
       !eventForm.horaStr ||
-      !eventForm.teatroId ||
+      !eventForm.salaId ||
       !eventForm.descripcion?.trim()
     ) {
       return setErrorMsg('Error: Todos los campos son obligatorios.');
@@ -175,23 +188,23 @@ const AdminPanel = () => {
     loadData();
   };
 
-  const handleSaveTeatro = async () => {
+  const handleSaveSala = async () => {
     setErrorMsg('');
 
-    if (!teatroForm.nombre.trim()) {
+    if (!salaForm.nombre.trim()) {
       return setErrorMsg('El nombre de la sala es obligatorio.');
     }
 
-    if (teatroForm.filas.length === 0) {
+    if (salaForm.filas.length === 0) {
       return setErrorMsg('La sala debe tener al menos una fila.');
     }
 
-    const filasSinCategoria = teatroForm.filas.some((f) => !f.categoriaId);
+    const filasSinCategoria = salaForm.filas.some((f) => !f.categoriaId);
     if (filasSinCategoria) {
       return setErrorMsg('Todas las filas deben tener categoría.');
     }
 
-    await EventService.saveTeatro(teatroForm);
+    await EventService.saveSala(salaForm);
     closeModals();
     loadData();
   };
@@ -259,7 +272,7 @@ const AdminPanel = () => {
               fechaStr: '',
               horaStr: '',
               descripcion: '',
-              teatroId: '',
+              salaId: '',
             });
             setOpenEvent(true);
           }}
@@ -270,21 +283,21 @@ const AdminPanel = () => {
 
       {tab === 1 && (
         <SalasTab
-          salas={teatros}
+          salas={salas}
           onNew={() => {
-            setTeatroForm({ id: null, nombre: '', filas: [] });
-            setOpenTeatro(true);
+            setSalaForm({ id: null, nombre: '', filas: [] });
+            setOpenSala(true);
           }}
-          onEdit={(t) => {
-            setTeatroForm(t);
-            setOpenTeatro(true);
+          onEdit={(s) => {
+            setSalaForm(s);
+            setOpenSala(true);
           }}
-          onDelete={handleDeleteTeatro}
+          onDelete={handleDeleteSala}
         />
       )}
 
       {tab === 2 && (
-        <UsuariosTab
+        <UsersTab
           users={users}
           onNew={() => {
             setUserForm({ id: null, nombre: '', username: '', password: '' });
@@ -326,15 +339,15 @@ const AdminPanel = () => {
         setForm={setEventForm}
         onSave={handleSaveEvent}
         errorMsg={errorMsg}
-        teatros={teatros}
+        salas={salas}
       />
 
       <SalaDialog
-        open={openTeatro}
+        open={openSala}
         onClose={closeModals}
-        form={teatroForm}
-        setForm={setTeatroForm}
-        onSave={handleSaveTeatro}
+        form={salaForm}
+        setForm={setSalaForm}
+        onSave={handleSaveSala}
         errorMsg={errorMsg}
         categorias={categorias}
       />

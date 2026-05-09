@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Paper,
   Table,
@@ -14,7 +13,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import { getAdminStyles } from '../../../styles/adminStyles';
 
-const EventsTab = ({ events, onEdit, onNew, onDelete }) => {
+const UsersTab = ({ users, onEdit, onNew, onDelete }) => {
   const theme = useTheme();
   const s = getAdminStyles(theme);
 
@@ -26,20 +25,22 @@ const EventsTab = ({ events, onEdit, onNew, onDelete }) => {
         onClick={onNew}
         sx={s.addButton}
       >
-        Nuevo Evento
+        Nuevo Usuario
       </Button>
 
       <Table sx={s.tableContainer}>
         <TableBody>
-          {events.map((e) => (
-            <TableRow key={e.id_evento} sx={s.tableRow}>
-              <TableCell sx={s.tableText}>{e.nombre}</TableCell>
+          {users.map((u) => (
+            <TableRow key={u.id} sx={s.tableRow}>
+              <TableCell sx={s.tableText}>
+                {u.nombre} ({u.username})
+              </TableCell>
 
               <TableCell align="right" sx={s.actionCell}>
-                <IconButton color="primary" onClick={() => onEdit(e)}>
+                <IconButton color="primary" onClick={() => onEdit(u)}>
                   <EditIcon />
                 </IconButton>
-                <IconButton color="error" onClick={() => onDelete(e.id_evento)}>
+                <IconButton color="error" onClick={() => onDelete(u.id)}>
                   <DeleteIcon />
                 </IconButton>
               </TableCell>
@@ -51,4 +52,4 @@ const EventsTab = ({ events, onEdit, onNew, onDelete }) => {
   );
 };
 
-export default EventsTab;
+export default UsersTab;

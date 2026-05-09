@@ -36,13 +36,13 @@ export default function Footer() {
       <Container maxWidth="lg">
         <Grid container spacing={6.5}>
           {/* COLUMNA 1 - MARCA */}
-          <Grid item xs={12} md={3}>
+          <Grid xs={12} md={3}>
             <Box sx={{ maxWidth: 300 }}>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
                 🎟️ TicketFlow
               </Typography>
 
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
                 Sistema de gestión y venta de tickets para eventos y shows de
                 entretenimiento. Descubrí experiencias y conectate con la comunidad.
               </Typography>
@@ -50,7 +50,7 @@ export default function Footer() {
           </Grid>
 
           {/* COLUMNA 2 - INFORMACIÓN */}
-          <Grid item xs={12} md={3}>
+          <Grid xs={12} md={3}>
             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
               Información
             </Typography>
@@ -75,7 +75,7 @@ export default function Footer() {
           </Grid>
 
           {/* COLUMNA 3- COMUNIDAD */}
-          <Grid item xs={12} md={3}>
+          <Grid xs={12} md={3}>
             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
               Comunidad
             </Typography>
@@ -95,13 +95,13 @@ export default function Footer() {
               </IconButton>
             </Box>
 
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+            <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
               Seguinos para enterarte de nuevos eventos.
             </Typography>
           </Grid>
 
           {/* COLUMNA 4 - CONTACTO */}
-          <Grid item xs={12} md={3}>
+          <Grid xs={12} md={3}>
             <Typography variant="subtitle1" sx={{ mb: 3.5, fontWeight: 'bold' }}>
               Contacto
             </Typography>
@@ -120,7 +120,7 @@ export default function Footer() {
               </MuiLink>
             </Box>
 
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
+            <Typography variant="body2" sx={{ mt: 3, color: 'text.secondary' }}>
               Respondemos dentro de las 24hs.
             </Typography>
           </Grid>
@@ -139,7 +139,7 @@ export default function Footer() {
             gap: 2,
           }}
         >
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             © 2026 TicketFlow. Todos los derechos reservados.
           </Typography>
 

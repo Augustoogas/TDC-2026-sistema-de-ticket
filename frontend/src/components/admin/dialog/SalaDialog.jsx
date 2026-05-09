@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -42,12 +41,14 @@ const SalaDialog = ({
       open={open}
       onClose={onClose}
       fullWidth
-      PaperProps={{
-        sx: {
-          width: 400,
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
+      slotProps={{
+        paper: {
+          sx: {
+            width: 400,
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 2,
+          },
         },
       }}
     >
@@ -103,7 +104,7 @@ const SalaDialog = ({
             <TextField
               type="number"
               size="small"
-              inputProps={{ min: 1 }}
+              slotProps={{ htmlInput: { min: 1 } }}
               sx={{ ...styles.inputStyle, width: 100 }}
               value={f.asientos}
               onChange={(e) =>

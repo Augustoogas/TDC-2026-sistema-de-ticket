@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
   Container,
   Typography,
@@ -60,8 +58,7 @@ const Help = () => {
 
         <Typography
           variant="body1"
-          color="text.secondary"
-          sx={{ maxWidth: 600, mx: 'auto' }}
+          sx={{ maxWidth: 600, mx: 'auto', color: 'text.secondary' }}
         >
           Encontrá respuestas rápidas a las preguntas más comunes o ponete en
           contacto con nosotros.
@@ -97,7 +94,7 @@ const Help = () => {
             </AccordionSummary>
 
             <AccordionDetails>
-              <Typography color="text.secondary">{faq.answer}</Typography>
+              <Typography sx={{ color: 'text.secondary' }}>{faq.answer}</Typography>
             </AccordionDetails>
           </Accordion>
         ))}
@@ -111,7 +108,9 @@ const Help = () => {
           ¿No encontraste lo que buscabas?
         </Typography>
 
-        <Typography color="text.secondary" sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
+        <Typography
+          sx={{ mb: 4, maxWidth: 600, mx: 'auto', color: 'text.secondary' }}
+        >
           Podés enviarnos un mensaje y te responderemos lo antes posible.
         </Typography>
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -12,7 +11,7 @@ import {
 } from '@mui/material';
 import { getAdminStyles } from '../../../styles/adminStyles';
 
-const UserDialog = ({ open, onClose, form, setForm, onSave, errorMsg }) => {
+const CategoriaDialog = ({ open, onClose, form, setForm, onSave, errorMsg }) => {
   const theme = useTheme();
   const styles = getAdminStyles(theme);
 
@@ -24,17 +23,18 @@ const UserDialog = ({ open, onClose, form, setForm, onSave, errorMsg }) => {
     <Dialog
       open={open}
       onClose={onClose}
-      fullWidth
-      maxWidth="xs"
-      PaperProps={{
-        sx: {
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
+      slotProps={{
+        paper: {
+          sx: {
+            width: 350,
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 2,
+          },
         },
       }}
     >
-      <DialogTitle sx={styles.dialogPaper}>Usuario</DialogTitle>
+      <DialogTitle sx={styles.dialogPaper}>Categoría</DialogTitle>
 
       <DialogContent sx={{ ...styles.dialogPaper, pb: 0 }}>
         {errorMsg && (
@@ -53,20 +53,22 @@ const UserDialog = ({ open, onClose, form, setForm, onSave, errorMsg }) => {
           />
 
           <TextField
-            label="Username"
+            label="Precio"
+            type="number"
             fullWidth
             sx={styles.inputStyle}
-            value={form.username}
-            onChange={(e) => updateField('username', e.target.value)}
+            value={form.precioBase}
+            onChange={(e) =>
+              updateField('precioBase', parseInt(e.target.value) || 0)
+            }
           />
 
           <TextField
-            label="Password"
-            type="password"
+            type="color"
             fullWidth
             sx={styles.inputStyle}
-            value={form.password}
-            onChange={(e) => updateField('password', e.target.value)}
+            value={form.color}
+            onChange={(e) => updateField('color', e.target.value)}
           />
         </Stack>
       </DialogContent>
@@ -83,4 +85,4 @@ const UserDialog = ({ open, onClose, form, setForm, onSave, errorMsg }) => {
   );
 };
 
-export default UserDialog;
+export default CategoriaDialog;

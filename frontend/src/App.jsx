@@ -1,6 +1,8 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
+
 import MainLayout from './layouts/MainLayout';
 import ScrollTop from './components/ScrollTop';
+
 import Home from './pages/Home';
 import Events from './pages/Events';
 import EventDetail from './pages/EventDetail';
@@ -12,10 +14,11 @@ import AdminPanel from './pages/AdminPanel';
 
 function App() {
   return (
-    <Router>
+    <>
       <ScrollTop />
+
       <Routes>
-        {/* Página sin layout (login) */}
+        {/* Página sin layout */}
         <Route path="/login" element={<Login />} />
 
         {/* Páginas con layout */}
@@ -29,7 +32,7 @@ function App() {
           <Route path="/create-event" element={<AdminPanel />} />
         </Route>
       </Routes>
-    </Router>
+    </>
   );
 }
 

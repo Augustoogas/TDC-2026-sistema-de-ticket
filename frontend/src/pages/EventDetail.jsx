@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -113,19 +113,21 @@ const EventDetail = () => {
           borderRadius: '20px',
         }}
       >
-        <Typography variant="h4" fontWeight="bold" sx={{ mb: 2 }}>
+        <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>
           {event.nombre}
         </Typography>
 
         <Typography
           variant="body1"
-          color="primary.main"
-          sx={{ mb: 2, fontWeight: 600 }}
+          sx={{ mb: 2, fontWeight: 600, color: theme.palette.primary.main }}
         >
           {event.fecha}
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+        <Typography
+          variant="body2"
+          sx={{ lineHeight: 1.7, color: theme.palette.text.secondary }}
+        >
           {event.descripcion}
         </Typography>
 
@@ -148,7 +150,7 @@ const EventDetail = () => {
 
       {/* ESCENARIO */}
       <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Typography variant="overline" letterSpacing={4} sx={{ fontWeight: 600 }}>
+        <Typography variant="overline" sx={{ fontWeight: 600, letterSpacing: 4 }}>
           ESCENARIO
         </Typography>
       </Box>
@@ -162,7 +164,7 @@ const EventDetail = () => {
           px: 1,
         }}
       >
-        <Stack spacing={2} alignItems="center">
+        <Stack spacing={2} sx={{ alignItems: 'center' }}>
           {event.filas.map((fila) => (
             <Box
               key={fila.letra}
@@ -176,7 +178,7 @@ const EventDetail = () => {
               <Typography
                 sx={{
                   width: 30,
-                  color: 'text.secondary',
+                  color: theme.palette.text.secondary,
                   fontWeight: 600,
                   textAlign: 'center',
                 }}

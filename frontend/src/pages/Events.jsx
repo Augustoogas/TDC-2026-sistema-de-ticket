@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -11,12 +11,14 @@ import {
   TextField,
   Box,
   CircularProgress,
+  useTheme,
 } from '@mui/material';
 
 import { EventService } from '../services/api';
 
 const Events = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,11 +49,11 @@ const Events = () => {
     <Container maxWidth="lg" sx={{ py: 6 }}>
       {/* HEADER */}
       <Box sx={{ mb: 6, textAlign: 'center' }}>
-        <Typography variant="h3" sx={{ mb: 2 }}>
+        <Typography variant="h3" sx={{ mb: 2, fontWeight: 700 }}>
           Eventos
         </Typography>
 
-        <Typography color="text.secondary">
+        <Typography sx={{ color: theme.palette.text.secondary }}>
           Explorá todos los eventos disponibles
         </Typography>
       </Box>
@@ -71,7 +73,7 @@ const Events = () => {
       {/* GRID DE EVENTOS */}
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress color="primary" />
+          <CircularProgress />
         </Box>
       ) : (
         <Box
@@ -82,13 +84,35 @@ const Events = () => {
               sm: 'repeat(2, 1fr)',
               md: 'repeat(3, 1fr)',
             },
-            gap: 3,
+            gap: 3.5,
           }}
         >
           {eventosFiltrados.map((evento) => (
-            <Card key={evento.id_evento}>
-              <CardActionArea onClick={() => navigate(`/event/${evento.id_evento}`)}>
-                <Box sx={{ position: 'relative', pt: '56.25%' }}>
+            <Card
+              key={evento.id_evento}
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <CardActionArea
+                onClick={() => navigate(`/event/${evento.id_evento}`)}
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'stretch',
+                }}
+              >
+                <Box
+                  sx={{
+                    position: 'relative',
+                    width: '100%',
+                    aspectRatio: '16 / 9',
+                    overflow: 'hidden',
+                  }}
+                >
                   <CardMedia
                     component="img"
                     image={
@@ -97,18 +121,44 @@ const Events = () => {
                     }
                     alt={evento.nombre}
                     sx={{
-                      position: 'absolute',
-                      inset: 0,
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover',
+                      display: 'block',
                     }}
                   />
                 </Box>
 
-                <CardContent>
-                  <Typography variant="h6">{evento.nombre}</Typography>
-                  <Typography variant="body2" color="text.secondary">
+                {/* CONTENT */}
+                <CardContent
+                  sx={{
+                    flexGrow: 1,
+                    py: 2,
+                    px: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 0.5,
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 500,
+                      lineHeight: 1.2,
+                      mb: 1.5,
+                    }}
+                  >
+                    {evento.nombre}
+                  </Typography>
+
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      lineHeight: 1.3,
+                      mb: 0.5,
+                    }}
+                  >
                     {evento.fecha}
                   </Typography>
                 </CardContent>
@@ -118,10 +168,12 @@ const Events = () => {
         </Box>
       )}
 
-      {/* MENSAJE SIN RESULTADOS */}
-      {eventosFiltrados.length === 0 && (
+      {/* EMPTY */}
+      {!loading && eventosFiltrados.length === 0 && (
         <Box sx={{ mt: 6, textAlign: 'center' }}>
-          <Typography color="text.secondary">No se encontraron eventos.</Typography>
+          <Typography sx={{ color: theme.palette.text.secondary }}>
+            No se encontraron eventos.
+          </Typography>
         </Box>
       )}
     </Container>

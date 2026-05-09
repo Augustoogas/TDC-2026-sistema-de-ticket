@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import {
@@ -50,6 +50,7 @@ const Checkout = () => {
         navigate('/');
       }
     } catch (error) {
+      console.error(error);
       alert('Error al procesar el pago');
     } finally {
       setLoading(false);
@@ -79,7 +80,7 @@ const Checkout = () => {
           Finalizar compra
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
           Revisá los datos antes de confirmar el pago
         </Typography>
 
@@ -106,7 +107,7 @@ const Checkout = () => {
             {evento}
           </Typography>
 
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>
             Asientos: {asientos.length ? asientos.join(', ') : 'Ninguno'}
           </Typography>
 
@@ -146,12 +147,12 @@ const Checkout = () => {
               label="Número de tarjeta"
               fullWidth
               required
-              inputProps={{ maxLength: 16 }}
+              slotProps={{ htmlInput: { maxLength: 16 } }}
               variant="outlined"
             />
 
             <Grid container spacing={2}>
-              <Grid item xs={6}>
+              <Grid xs={6}>
                 <TextField
                   label="Vencimiento"
                   fullWidth
@@ -160,13 +161,13 @@ const Checkout = () => {
                 />
               </Grid>
 
-              <Grid item xs={6}>
+              <Grid xs={6}>
                 <TextField
                   label="CVV"
                   type="password"
                   fullWidth
                   required
-                  inputProps={{ maxLength: 3 }}
+                  slotProps={{ htmlInput: { maxLength: 3 } }}
                   variant="outlined"
                 />
               </Grid>
