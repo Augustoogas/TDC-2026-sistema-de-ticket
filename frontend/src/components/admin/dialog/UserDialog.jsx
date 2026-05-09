@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -12,7 +11,7 @@ import {
 } from '@mui/material';
 import { getAdminStyles } from '../../../styles/adminStyles';
 
-const CategoriaDialog = ({ open, onClose, form, setForm, onSave, errorMsg }) => {
+const UserDialog = ({ open, onClose, form, setForm, onSave, errorMsg }) => {
   const theme = useTheme();
   const styles = getAdminStyles(theme);
 
@@ -24,16 +23,19 @@ const CategoriaDialog = ({ open, onClose, form, setForm, onSave, errorMsg }) => 
     <Dialog
       open={open}
       onClose={onClose}
-      PaperProps={{
-        sx: {
-          width: 350,
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
+      fullWidth
+      maxWidth="xs"
+      slotProps={{
+        paper: {
+          sx: {
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 2,
+          },
         },
       }}
     >
-      <DialogTitle sx={styles.dialogPaper}>Categoría</DialogTitle>
+      <DialogTitle sx={styles.dialogPaper}>Usuario</DialogTitle>
 
       <DialogContent sx={{ ...styles.dialogPaper, pb: 0 }}>
         {errorMsg && (
@@ -52,22 +54,20 @@ const CategoriaDialog = ({ open, onClose, form, setForm, onSave, errorMsg }) => 
           />
 
           <TextField
-            label="Precio"
-            type="number"
+            label="Username"
             fullWidth
             sx={styles.inputStyle}
-            value={form.precioBase}
-            onChange={(e) =>
-              updateField('precioBase', parseInt(e.target.value) || 0)
-            }
+            value={form.username}
+            onChange={(e) => updateField('username', e.target.value)}
           />
 
           <TextField
-            type="color"
+            label="Password"
+            type="password"
             fullWidth
             sx={styles.inputStyle}
-            value={form.color}
-            onChange={(e) => updateField('color', e.target.value)}
+            value={form.password}
+            onChange={(e) => updateField('password', e.target.value)}
           />
         </Stack>
       </DialogContent>
@@ -84,4 +84,4 @@ const CategoriaDialog = ({ open, onClose, form, setForm, onSave, errorMsg }) => 
   );
 };
 
-export default CategoriaDialog;
+export default UserDialog;

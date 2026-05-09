@@ -1,4 +1,3 @@
-import React from 'react';
 import { Container, Typography, Box, Divider } from '@mui/material';
 
 const About = () => {
@@ -23,8 +22,7 @@ const About = () => {
 
         <Typography
           variant="body1"
-          color="text.secondary"
-          sx={{ maxWidth: 600, mx: 'auto' }}
+          sx={{ maxWidth: 600, mx: 'auto', color: 'text.secondary' }}
         >
           TicketFlow es una plataforma para descubrir, explorar y comprar entradas
           para eventos de forma simple y sin vueltas.
@@ -37,7 +35,7 @@ const About = () => {
           Nuestra misión
         </Typography>
 
-        <Typography color="text.secondary" sx={{ maxWidth: 700, mx: 'auto' }}>
+        <Typography sx={{ maxWidth: 700, mx: 'auto', color: 'text.secondary' }}>
           Queremos conectar a las personas con experiencias únicas, facilitando el
           acceso a eventos en un solo lugar, con una experiencia clara y pensada para
           vos.
@@ -80,7 +78,7 @@ const About = () => {
                 {item.step}
               </Typography>
 
-              <Typography sx={{ mt: 1 }} color="text.secondary">
+              <Typography sx={{ mt: 1, color: 'text.secondary' }}>
                 {item.title}
               </Typography>
             </Box>
@@ -96,7 +94,7 @@ const About = () => {
           ¿Por qué existe TicketFlow?
         </Typography>
 
-        <Typography color="text.secondary" sx={{ maxWidth: 700, mx: 'auto' }}>
+        <Typography sx={{ maxWidth: 700, mx: 'auto', color: 'text.secondary' }}>
           Comprar entradas suele ser lento y confuso. TicketFlow nace para
           simplificar todo en una sola experiencia: rápida, clara y accesible desde
           cualquier lugar.
@@ -136,7 +134,7 @@ const About = () => {
               {stat.value}
             </Typography>
 
-            <Typography color="text.secondary">{stat.label}</Typography>
+            <Typography sx={{ color: 'text.secondary' }}>{stat.label}</Typography>
           </Box>
         ))}
       </Box>

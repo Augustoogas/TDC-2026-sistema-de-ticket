@@ -1,4 +1,3 @@
-import React from 'react';
 import { Paper, Typography, Tooltip, useTheme, alpha } from '@mui/material';
 import ChairIcon from '@mui/icons-material/Chair';
 

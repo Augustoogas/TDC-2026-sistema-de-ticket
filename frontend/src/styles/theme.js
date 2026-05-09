@@ -79,13 +79,20 @@ const theme = createTheme({
           backgroundImage: 'none',
           border: `1px solid ${theme.palette.custom.cardBorder}`,
 
-          transition: 'all 0.25s ease',
-          willChange: 'transform',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+
+          overflow: 'hidden',
+          position: 'relative',
+
+          transition: 'transform 0.25s ease, box-shadow 0.25s ease',
 
           '&:hover': {
             transform: 'scale(1.03)',
             boxShadow: `0 12px 30px ${theme.palette.custom.cardShadow}`,
             borderColor: theme.palette.primary.main,
+            zIndex: 2,
           },
         }),
       },
@@ -97,7 +104,6 @@ const theme = createTheme({
           borderRadius: 10,
           padding: '10px 18px',
           fontFamily: theme.typography.button.fontFamily,
-          transition: 'background-color 0.2s ease',
         }),
 
         containedPrimary: ({ theme }) => ({

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import heroImage from '../assets/images/hero.jpg';
 
@@ -24,7 +24,6 @@ const Home = () => {
 
   const scrollRef = useRef(null);
 
-  // FETCH EVENTOS
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -40,7 +39,6 @@ const Home = () => {
     fetchEvents();
   }, []);
 
-  // SCROLL HORIZONTAL
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
@@ -49,7 +47,7 @@ const Home = () => {
       if (container.scrollWidth > container.clientWidth) {
         e.preventDefault();
         container.scrollBy({
-          left: e.deltaY * 10,
+          left: e.deltaY * 6,
           behavior: 'smooth',
         });
       }
@@ -77,7 +75,6 @@ const Home = () => {
           overflow: 'hidden',
           isolation: 'isolate',
 
-          // IMAGEN
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -87,14 +84,8 @@ const Home = () => {
             backgroundPosition: 'center',
             filter: 'brightness(0.35)',
             transform: 'scale(1.1)',
-
-            maskImage:
-              'radial-gradient(circle at center, black 55%, transparent 100%)',
-            WebkitMaskImage:
-              'radial-gradient(circle at center, black 55%, transparent 100%)',
           },
 
-          // OVERLAY
           '&::after': {
             content: '""',
             position: 'absolute',
@@ -130,8 +121,7 @@ const Home = () => {
 
         <Typography
           variant="body1"
-          color="text.secondary"
-          sx={{ maxWidth: 600, mx: 'auto' }}
+          sx={{ maxWidth: 600, mx: 'auto', color: 'text.secondary' }}
         >
           Explorá shows, conciertos y eventos exclusivos en un solo lugar.
         </Typography>
@@ -143,10 +133,15 @@ const Home = () => {
           Eventos destacados
         </Typography>
 
-        {/* No bloquea la página si no hay eventos */}
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
             <CircularProgress color="primary" />
+          </Box>
+        ) : eventosDestacados.length === 0 ? (
+          <Box sx={{ mt: 6, textAlign: 'center' }}>
+            <Typography sx={{ color: 'text.secondary' }}>
+              No se encontraron eventos.
+            </Typography>
           </Box>
         ) : (
           <Box
@@ -160,6 +155,7 @@ const Home = () => {
               pb: 2,
               scrollbarWidth: 'none',
               '&::-webkit-scrollbar': { display: 'none' },
+              alignItems: 'stretch',
             }}
           >
             {eventosDestacados.map((evento, index) => (
@@ -193,9 +189,32 @@ const Home = () => {
                     />
                   </Box>
 
-                  <CardContent>
-                    <Typography variant="h6">{evento.nombre}</Typography>
-                    <Typography variant="body2" color="text.secondary">
+                  <CardContent
+                    sx={{
+                      flexGrow: 1,
+                      pt: 2,
+                      pb: 2,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      minHeight: 120,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: 500, mb: 0.5, lineHeight: 1.3 }}
+                    >
+                      {evento.nombre}
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: '0.875rem',
+                        color: 'text.secondary',
+                        mt: 'auto',
+                      }}
+                    >
                       {evento.fecha}
                     </Typography>
                   </CardContent>
@@ -212,10 +231,8 @@ const Home = () => {
             p: { xs: 4, md: 6 },
             textAlign: 'center',
             borderRadius: 4,
-
             background: theme.palette.background.paper,
             border: `1px solid ${theme.palette.custom.cardBorder}`,
-
             transition: '0.25s',
 
             '&:hover': {
@@ -228,8 +245,7 @@ const Home = () => {
           </Typography>
 
           <Typography
-            color="text.secondary"
-            sx={{ mb: 4, maxWidth: 500, mx: 'auto' }}
+            sx={{ mb: 4, maxWidth: 500, mx: 'auto', color: 'text.secondary' }}
           >
             Explorá todos los eventos disponibles y encontrá la experiencia perfecta.
           </Typography>

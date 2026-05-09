@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -14,15 +13,7 @@ import {
 } from '@mui/material';
 import { getAdminStyles } from '../../../styles/adminStyles';
 
-const EventDialog = ({
-  open,
-  onClose,
-  form,
-  setForm,
-  onSave,
-  errorMsg,
-  teatros,
-}) => {
+const EventDialog = ({ open, onClose, form, setForm, onSave, errorMsg, salas }) => {
   const theme = useTheme();
   const styles = getAdminStyles(theme);
 
@@ -36,11 +27,13 @@ const EventDialog = ({
       onClose={onClose}
       fullWidth
       maxWidth="sm"
-      PaperProps={{
-        sx: {
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
+      slotProps={{
+        paper: {
+          sx: {
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 2,
+          },
         },
       }}
     >
@@ -66,7 +59,9 @@ const EventDialog = ({
             <TextField
               type="date"
               fullWidth
-              InputLabelProps={{ shrink: true }}
+              slotProps={{
+                inputLabel: { shrink: true },
+              }}
               sx={styles.inputStyle}
               value={form.fechaStr}
               onChange={(e) => updateField('fechaStr', e.target.value)}
@@ -75,7 +70,9 @@ const EventDialog = ({
             <TextField
               type="time"
               fullWidth
-              InputLabelProps={{ shrink: true }}
+              slotProps={{
+                inputLabel: { shrink: true },
+              }}
               sx={styles.inputStyle}
               value={form.horaStr}
               onChange={(e) => updateField('horaStr', e.target.value)}
@@ -87,12 +84,12 @@ const EventDialog = ({
             label="Sala"
             fullWidth
             sx={styles.inputStyle}
-            value={form.teatroId}
-            onChange={(e) => updateField('teatroId', e.target.value)}
+            value={form.salaId}
+            onChange={(e) => updateField('salaId', e.target.value)}
           >
-            {teatros.map((t) => (
-              <MenuItem key={t.id} value={t.id}>
-                {t.nombre}
+            {salas.map((s) => (
+              <MenuItem key={s.id} value={s.id}>
+                {s.nombre}
               </MenuItem>
             ))}
           </TextField>
