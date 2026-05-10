@@ -33,4 +33,10 @@ public class Reserva {
     
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaExpiracion;
+
+    // agreagmos cantidad de entradas por sector y relacionamos reserva con el sector
+    @ManyToOne
+    @JoinColumn(name =  "sector_id")
+    private Sector sector;
+    private int cantidadEntradas;
 }
