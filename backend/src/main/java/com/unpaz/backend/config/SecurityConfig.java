@@ -20,25 +20,29 @@ public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
     private final PasswordEncoder passwordEncoder;
-
-    public SecurityConfig(UserDetailsServiceImpl userDetailsService, PasswordEncoder passwordEncoder) {
+    private final JwtAuthenticationFilter jwtAuthFilter;
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService,PasswordEncoder passwordEncoder,JwtAuthenticationFilter jwtAuthFilter) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
+        this.jwtAuthFilter = jwtAuthFilter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-            .csrf(csrf -> csrf.disable()) // Deshabilitamos CSRF para APIs
-            .headers(headers -> headers.frameOptions(frame -> frame.disable())) // Permitir ver H2 en un iframe
+            .csrf(csrf -> csrf.disable()) 
+            .headers(headers -> headers.frameOptions(frame -> frame.disable())) 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll() // Consola H2 libre
-                .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()    // Login libre
-                .requestMatchers(new AntPathRequestMatcher("/api/eventos/**", "GET")).permitAll() // Ver eventos libre
-                .anyRequest().authenticated() // Todo lo demás pide login
+                // Usamos strings directos que suelen ser más efectivos en Spring Boot 3
+                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll() 
+                .requestMatchers("/api/eventos/**").permitAll() 
+                .anyRequest().authenticated()
             )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Sin estado (para JWT)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())
+            // El filtro de JWT debe ir ANTES del de usuario/contraseña
+            .addFilterBefore(jwtAuthFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
             .build();
     }
 
