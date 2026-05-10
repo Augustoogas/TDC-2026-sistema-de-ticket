@@ -1,12 +1,14 @@
 package com.unpaz.backend.controller;
 import com.unpaz.backend.model.Role;
 import com.unpaz.backend.model.AuthResponse;
-import com.unpaz.backend.dto.RegisterRequest; 
+import com.unpaz.backend.dto.RegisterRequest;
+import com.unpaz.backend.dto.UserProfileDto;
 import com.unpaz.backend.model.Usuario;
 import com.unpaz.backend.repository.UsuarioRepository;
 import com.unpaz.backend.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,6 +53,37 @@ public class AuthController {
                 .token(token)
                 .build()
         );
+    }
+ 
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()") // Solo usuarios logueados pueden ver su perfil
+    public ResponseEntity<?> getMyProfile() {
+        // 1. Obtenemos el "Principal" (que el log nos confirmó que es un String/Email)
+        Object principal = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        String email;
+        if (principal instanceof UserDetails) {
+            email = ((UserDetails) principal).getUsername();
+        } else {
+            email = principal.toString();
+        }
+
+        // 2. Buscamos al usuario real en la DB usando el email
+        Usuario usuarioLogueado = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // 3. Mapeamos al DTO
+        UserProfileDto perfil = UserProfileDto.builder()
+                .nombre(usuarioLogueado.getNombre())
+                .apellido(usuarioLogueado.getApellido())
+                .email(usuarioLogueado.getEmail())
+                .role(usuarioLogueado.getRole())
+                .build();
+
+        return ResponseEntity.ok(perfil);
     }
 
     @PostMapping("/login")

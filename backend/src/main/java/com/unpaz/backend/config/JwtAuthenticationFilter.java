@@ -1,6 +1,7 @@
 package com.unpaz.backend.config;
 
 import com.unpaz.backend.service.JwtService;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +31,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-    	if (request.getServletPath().contains("/api/auth")) {
+    	if (request.getServletPath().contains("/api/auth/login")||
+    			request.getServletPath().contains("/api/auth/register"))
+    			 {
             filterChain.doFilter(request, response);
             return;
         }
