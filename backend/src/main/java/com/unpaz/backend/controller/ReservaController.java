@@ -42,6 +42,19 @@ public class ReservaController {
         ReservaDTO respuesta = reservaservice.crearReservaTemporal(dto, clienteId);
         return ResponseEntity.ok(respuesta);
     }
+// --------------
+
+    @PatchMapping("/{id}/cancelar")
+    public ResponseEntity<ReservaDTO> cancelarReserva(@PathVariable("id") Long reservaId){
+        ReservaDTO reservaCancelada = reservaservice.cancelarReserva(reservaId);
+        return ResponseEntity.ok(reservaCancelada);
+    }
+
+    @PatchMapping("/{id}/confirmar")
+    public ResponseEntity<ReservaDTO> confirmarReserva(@PathVariable("id") Long reservaId){
+        ReservaDTO reservaConfirmada = reservaservice.confirmarReserva(reservaId);
+        return ResponseEntity.ok(reservaConfirmada);
+    }
 
     // para ver lo de sectores (solo prueba) -- separalo en su propio controller 
     @GetMapping("/sector/{id}")
