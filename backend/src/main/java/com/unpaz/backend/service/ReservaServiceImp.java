@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.unpaz.backend.dto.ReservaDTO;
 import com.unpaz.backend.repository.EventoRepository;
@@ -27,6 +29,7 @@ public class ReservaServiceImp implements IReservaService {
     private final SectorRepository sectorRepo;
 
     private final static int MINUTOS_EXPIRACION = 15;
+    private final static int MAXIMO_ENTRADAS = 10;
 
     @Override
     public List<ReservaDTO> listarTodas() {
@@ -74,6 +77,7 @@ public class ReservaServiceImp implements IReservaService {
         if(reservaDTO.getEventoId() == null){throw new RuntimeException("El ID del evento es obligatorio");}
         if(reservaDTO.getSectorId() == null){throw new RuntimeException("El ID del sector es obligatorio");}
         if(reservaDTO.getCantidadEntradas() <= 0){ throw new RuntimeException("Cantidad inválida");}
+        if(reservaDTO.getCantidadEntradas() > MAXIMO_ENTRADAS){ throw new RuntimeException("Maximo permitido: " + MAXIMO_ENTRADAS + " entradas");} // -> considerar throw new ResponseStatusException(HttpStatus.BAD_REQUEST, )
     } 
    
 
@@ -105,6 +109,46 @@ public class ReservaServiceImp implements IReservaService {
 
         return reserva;
     }
+
+    // confirmar
+    @Override
+    @Transactional
+    public ReservaDTO confirmarReserva(Long reservaId){
+        Reserva reserva = reservaRepo.findById(reservaId)
+        .orElseThrow(() -> new RuntimeException("Reserva no encontrada."));
+
+        // validacion de estado
+        if(reserva.getEstado() != EstadoReserva.PENDIENTE){ throw new RuntimeException("La reseva esta expirada");}
+
+        reserva.setEstado(EstadoReserva.PAGADA);
+
+        Reserva reservaGuardada = reservaRepo.save(reserva);
+
+        return mapearDTO(reservaGuardada);
+    }
+
+    // cancelar
+    @Override
+    @Transactional
+    public ReservaDTO cancelarReserva(Long reservaId){
+        Reserva reserva = reservaRepo.findById(reservaId)
+        .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+
+        // validar que no este espirada, cancelada o confirmada
+        if(reserva.getEstado() != EstadoReserva.PENDIENTE){throw new RuntimeException("La reserva esta expirada");}
+
+        reserva.setEstado(EstadoReserva.CANCELADA);
+
+        //actualizamos la info del sector.
+        Sector sector = reserva.getSector();
+        sector.setDisponibles(sector.getDisponibles() + reserva.getCantidadEntradas());
+        sectorRepo.save(sector);
+
+        Reserva reservaGuardadaCancelada = reservaRepo.save(reserva);
+        
+        return mapearDTO(reservaGuardadaCancelada);
+    }
+
 
     // crear un paquete aparte para el mapper
     private ReservaDTO mapearDTO(
