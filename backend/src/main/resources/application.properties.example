@@ -1,0 +1,22 @@
+
+# Servidor
+server.port=8081
+
+# Base de Datos PostgreSQL
+spring.datasource.url=jdbc:postgresql://localhost:5432/ticketflow
+spring.datasource.username=postgres
+spring.datasource.password="poner tu contra aca"
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# JPA / Hibernate
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+
+# Seguridad JWT
+# Usamos todos la misma para que no haya errores de validación entre nosotros
+jwt.secret=ClaveSecretaUnpaz2026
+# Tiempo de expiración del token (en milisegundos)
+# 86400000 ms = 24 horas
+jwt.expiration=86400000
