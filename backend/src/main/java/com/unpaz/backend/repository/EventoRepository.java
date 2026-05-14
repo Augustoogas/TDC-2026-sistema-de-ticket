@@ -8,6 +8,6 @@ import com.unpaz.backend.model.Evento;
 @Repository
 public interface EventoRepository extends JpaRepository<Evento, Long> {
 
-    
-    List<Evento> findByTituloContainingOrTipoContaining(String titulo, String tipo);
+    // query que buscar por titulo, tipo, locacion
+    List<Evento> findByTituloContainingIgnoreCaseOrTipoContainingIgnoreCaseOrLocacionNombreContainingIgnoreCase(String titulo, String tipo, String locacion);
 }
