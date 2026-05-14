@@ -7,7 +7,7 @@ import com.unpaz.backend.model.Evento;
 
 public interface IEventoService {
     List<EventoDto> listarEventos();
-    List<EventoDto> buscarEventos();
+    List<EventoDto> buscarEventos(String q);
     EventoDto crearEvento(EventoDto eventoDto);
     EventoDto mapearDTO(Evento evento);
 }
