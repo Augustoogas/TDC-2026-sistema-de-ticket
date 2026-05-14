@@ -7,3 +7,9 @@ INSERT INTO cliente (usuario_id) VALUES (3);
 INSERT INTO locacion (id_locacion, nombre, direccion, capacidad, asientos) VALUES (1, 'Centro Cultural UNPAZ', 'Alem 700', 200, 'Estándar');
 INSERT INTO sector (sector_id, nombre, capacidad, disponibles, locacion_id) VALUES (1, 'VIP', 100, 100, 1);
 INSERT INTO evento (evento_id, titulo, tipo, descripcion, admin_id, locacion_evento_id) VALUES (1, 'Charla Tech', 'Conferencia', 'Java y Spring Boot', 2, 1);
+
+-- 
+INSERT INTO locacion (id_locacion, nombre, direccion, capacidad, asientos) VALUES (2, 'Teatro Avenida', 'Av Siempre Viva', 150, 'Estandar, VIP');
+INSERT INTO sector(sector_id, nombre, capacidad, disponibles, locacion_id) VALUES (2, 'VIP', 50, 50, 2);
+INSERT INTO sector(sector_id, nombre, capacidad, disponibles, locacion_id) VALUES (3, 'Estandar', 100, 100, 2);
+INSERT INTO evento (evento_id, titulo, tipo, descripcion, admin_id, locacion_evento_id) VALUES (2, 'Nikolai Kugansky', 'Concierto', 'Rachmaninoff Piano Concertos', 2, 2);
