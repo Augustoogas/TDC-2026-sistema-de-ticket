@@ -62,8 +62,8 @@ public class EventoController {
     @ApiResponse(responseCode = "403", description = "Acceso denegado - Se requiere rol ADMIN")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Evento> createEvento(@Valid @RequestBody Evento evento) {
-        Evento nuevoEvento = eventoRepository.save(evento);
+    public ResponseEntity<EventoDto> createEvento(@Valid @RequestBody EventoDto eventoDto) {
+        EventoDto nuevoEvento = eventoService.crearEvento(eventoDto);
         return new ResponseEntity<>(nuevoEvento, HttpStatus.CREATED);
     }
 }
