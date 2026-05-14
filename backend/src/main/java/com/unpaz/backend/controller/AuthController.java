@@ -1,4 +1,5 @@
 package com.unpaz.backend.controller;
+
 import com.unpaz.backend.model.Role;
 import com.unpaz.backend.model.AuthResponse;
 import com.unpaz.backend.dto.RegisterRequest;
@@ -6,6 +7,10 @@ import com.unpaz.backend.dto.UserProfileDto;
 import com.unpaz.backend.model.Usuario;
 import com.unpaz.backend.repository.UsuarioRepository;
 import com.unpaz.backend.service.JwtService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,18 +27,19 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Tag(name = "Autenticación", description = "Endpoints para registro, login y gestión de perfil")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-    
     private final PasswordEncoder passwordEncoder;
     private final UsuarioRepository usuarioRepository;
 
+    @Operation(summary = "Registrar nuevo usuario", description = "Crea un usuario en la base de datos y retorna un token JWT")
+    @ApiResponse(responseCode = "200", description = "Usuario registrado con éxito")
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
-        // 1. Creamos el usuario encriptando la contraseña
         Usuario user = Usuario.builder()
                 .nombre(request.getNombre())
                 .apellido(request.getApellido())
@@ -42,40 +48,30 @@ public class AuthController {
                 .role(request.getRole() != null ? Role.valueOf(request.getRole().toUpperCase()) : Role.CLIENTE)
                 .build();
 
-        // 2. Guardamos en la DB
         usuarioRepository.save(user);
-
-        // 3. Generamos token para que entre directo
         final String token = jwtService.generateToken(user);
 
-        return ResponseEntity.ok(
-            AuthResponse.builder()
-                .token(token)
-                .build()
-        );
+        return ResponseEntity.ok(AuthResponse.builder().token(token).build());
     }
- 
+
+    @Operation(
+        summary = "Obtener perfil del usuario actual", 
+        description = "Requiere token JWT. Retorna los datos del usuario autenticado.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponse(responseCode = "200", description = "Perfil obtenido correctamente")
+    @ApiResponse(responseCode = "403", description = "Token no válido o ausente")
     @GetMapping("/me")
-    @PreAuthorize("isAuthenticated()") // Solo usuarios logueados pueden ver su perfil
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getMyProfile() {
-        // 1. Obtenemos el "Principal" (que el log nos confirmó que es un String/Email)
         Object principal = org.springframework.security.core.context.SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
+                .getContext().getAuthentication().getPrincipal();
 
-        String email;
-        if (principal instanceof UserDetails) {
-            email = ((UserDetails) principal).getUsername();
-        } else {
-            email = principal.toString();
-        }
+        String email = (principal instanceof UserDetails) ? ((UserDetails) principal).getUsername() : principal.toString();
 
-        // 2. Buscamos al usuario real en la DB usando el email
         Usuario usuarioLogueado = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // 3. Mapeamos al DTO
         UserProfileDto perfil = UserProfileDto.builder()
                 .nombre(usuarioLogueado.getNombre())
                 .apellido(usuarioLogueado.getApellido())
@@ -86,22 +82,18 @@ public class AuthController {
         return ResponseEntity.ok(perfil);
     }
 
+    @Operation(summary = "Iniciar sesión", description = "Autentica credenciales y devuelve el token JWT")
+    @ApiResponse(responseCode = "200", description = "Login exitoso")
+    @ApiResponse(responseCode = "401", description = "Credenciales inválidas")
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody Map<String, String> request) {
         authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                request.get("email"), 
-                request.get("password")
-            )
+            new UsernamePasswordAuthenticationToken(request.get("email"), request.get("password"))
         );
 
         final UserDetails user = userDetailsService.loadUserByUsername(request.get("email"));
         final String token = jwtService.generateToken(user);
 
-        return ResponseEntity.ok(
-            AuthResponse.builder()
-                .token(token)
-                .build()
-        );
+        return ResponseEntity.ok(AuthResponse.builder().token(token).build());
     }
 }

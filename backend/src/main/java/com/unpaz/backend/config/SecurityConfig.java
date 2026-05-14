@@ -37,7 +37,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) 
             .headers(headers -> headers.frameOptions(frame -> frame.disable())) 
             .authorizeHttpRequests(auth -> auth
-                // Usamos strings directos que suelen ser más efectivos en Spring Boot 3
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/swagger-ui.html").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll() 
                 .requestMatchers("/api/eventos/**").permitAll() 

@@ -1,9 +1,11 @@
 package com.unpaz.backend.controller;
 
 import com.unpaz.backend.model.Ticket;
-
-
 import com.unpaz.backend.repository.TicketRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,19 +14,29 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tickets")
-@CrossOrigin(origins = "*") // Para que el Front pueda conectarse sin problemas de CORS
+@CrossOrigin(origins = "*")
+@Tag(name = "Tickets", description = "Endpoints para la generación y consulta de comprobantes de entrada")
 public class TicketController {
 
     @Autowired
     private TicketRepository ticketRepository;
 
-    // Obtener todos los tickets
+    @Operation(
+        summary = "Listar todos los tickets", 
+        description = "Retorna el historial completo de tickets generados en el sistema. Generalmente usado por administración."
+    )
+    @ApiResponse(responseCode = "200", description = "Lista de tickets obtenida con éxito")
     @GetMapping
     public List<Ticket> getAllTickets() {
         return ticketRepository.findAll();
     }
 
-    // Obtener un ticket por ID
+    @Operation(
+        summary = "Obtener ticket por ID", 
+        description = "Busca un ticket específico. Útil para mostrar el detalle de una compra finalizada."
+    )
+    @ApiResponse(responseCode = "200", description = "Ticket encontrado")
+    @ApiResponse(responseCode = "404", description = "Ticket no encontrado")
     @GetMapping("/{id}")
     public ResponseEntity<Ticket> getTicketById(@PathVariable Long id) {
         return ticketRepository.findById(id)
@@ -32,10 +44,15 @@ public class TicketController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Crear un nuevo ticket (Comprar)
+    @Operation(
+        summary = "Generar nuevo ticket (Compra)", 
+        description = "Registra la compra definitiva y genera el ticket. Requiere los datos de la reserva confirmada.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponse(responseCode = "200", description = "Ticket generado con éxito")
     @PostMapping
     public Ticket createTicket(@RequestBody Ticket ticket) {
-        // Aquí podrías agregar lógica extra, como validar si hay stock
+        // Podríamos sumar validaciones de stock aquí en el futuro
         return ticketRepository.save(ticket);
     }
 }
