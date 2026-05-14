@@ -11,25 +11,42 @@ const Login = () => {
   const [isRegister, setIsRegister] = useState(false);
 
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
     nombre: '',
+    apellido: '',
   });
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       if (isRegister) {
+        if (
+          !formData.nombre ||
+          !formData.apellido ||
+          !formData.email ||
+          !formData.password
+        ) {
+          throw new Error('Todos los campos son requeridos');
+        }
         await AuthService.register(formData);
+        alert('Registro exitoso');
+        setFormData({ email: '', password: '', nombre: '', apellido: '' });
         setIsRegister(false);
       } else {
-        const user = await AuthService.login(formData.username, formData.password);
-        localStorage.setItem('user', JSON.stringify(user));
+        if (!formData.email || !formData.password) {
+          throw new Error('Email y contraseña son requeridos');
+        }
+        await AuthService.login(formData.email, formData.password);
         navigate('/');
       }
     } catch (err) {
       alert(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,25 +113,38 @@ const Login = () => {
         <form onSubmit={handleSubmit}>
           <Stack spacing={2}>
             {isRegister && (
-              <TextField
-                label="Nombre completo"
-                fullWidth
-                required
-                variant="outlined"
-                onChange={(e) =>
-                  setFormData({ ...formData, nombre: e.target.value })
-                }
-              />
+              <>
+                <TextField
+                  label="Nombre"
+                  fullWidth
+                  required
+                  variant="outlined"
+                  value={formData.nombre}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nombre: e.target.value })
+                  }
+                />
+                <TextField
+                  label="Apellido"
+                  fullWidth
+                  required
+                  variant="outlined"
+                  value={formData.apellido}
+                  onChange={(e) =>
+                    setFormData({ ...formData, apellido: e.target.value })
+                  }
+                />
+              </>
             )}
 
             <TextField
-              label="Usuario"
+              label="Email"
+              type="email"
               fullWidth
               required
               variant="outlined"
-              onChange={(e) =>
-                setFormData({ ...formData, username: e.target.value })
-              }
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />
 
             <TextField
@@ -123,13 +153,14 @@ const Login = () => {
               fullWidth
               required
               variant="outlined"
+              value={formData.password}
               onChange={(e) =>
                 setFormData({ ...formData, password: e.target.value })
               }
             />
 
-            <Button type="submit" variant="contained" fullWidth>
-              {isRegister ? 'Registrarme' : 'Entrar'}
+            <Button type="submit" variant="contained" fullWidth disabled={loading}>
+              {loading ? 'Cargando...' : isRegister ? 'Registrarme' : 'Entrar'}
             </Button>
           </Stack>
         </form>
@@ -147,7 +178,10 @@ const Login = () => {
               backgroundColor: 'transparent',
             },
           })}
-          onClick={() => setIsRegister(!isRegister)}
+          onClick={() => {
+            setIsRegister(!isRegister);
+            setFormData({ email: '', password: '', nombre: '', apellido: '' });
+          }}
         >
           {isRegister
             ? '¿Ya tienes cuenta? Inicia sesión'

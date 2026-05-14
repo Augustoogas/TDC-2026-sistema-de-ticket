@@ -166,11 +166,150 @@ export const AdminService = {
   },
 };
 
+// --- CONFIGURACIÓN BASE ---
+const API_BASE_URL = 'http://localhost:8080/api';
+
+// --- HELPER PARA AGREGAR TOKEN A LAS PETICIONES ---
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('auth_token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+};
+
 export const AuthService = {
-  login: async (u, p) => {
-    const user = users.find((user) => user.username === u && user.password === p);
-    if (!user) throw new Error('Credenciales inválidas');
-    return user;
+  login: async (email, password) => {
+    console.log('Enviando login para:', email);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: 'omit',
+      });
+
+      console.log('Response status:', response.status);
+
+      const responseText = await response.text();
+      console.log('Response body:', responseText);
+
+      if (!response.ok) {
+        let errorMessage = `Error ${response.status}`;
+        try {
+          const errorData = JSON.parse(responseText);
+          console.log('Error data:', errorData);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          errorMessage = responseText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const data = JSON.parse(responseText);
+      console.log('Login exitoso');
+      localStorage.setItem('auth_token', data.token);
+
+      // Obtener perfil del usuario
+      const profileResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+
+      if (profileResponse.ok) {
+        const profile = await profileResponse.json();
+        localStorage.setItem('user', JSON.stringify(profile));
+        return profile;
+      }
+
+      return { email };
+    } catch (error) {
+      console.error('Error completo:', error);
+      throw error;
+    }
+  },
+
+  register: async (registerData) => {
+    const payload = {
+      nombre: registerData.nombre,
+      apellido: registerData.apellido,
+      email: registerData.email,
+      password: registerData.password,
+      role: registerData.role || 'CLIENTE',
+    };
+
+    console.log('Enviando registro:', payload);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(payload),
+        credentials: 'omit',
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', {
+        'content-type': response.headers.get('content-type'),
+      });
+
+      const responseText = await response.text();
+      console.log('Response body:', responseText);
+
+      if (!response.ok) {
+        let errorMessage = `Error ${response.status}`;
+        try {
+          const errorData = JSON.parse(responseText);
+          console.log('Error data:', errorData);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          errorMessage = responseText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const data = JSON.parse(responseText);
+      console.log('Registro exitoso, token:', data.token);
+      localStorage.setItem('auth_token', data.token);
+
+      // Obtener perfil del usuario
+      const profileResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+
+      if (profileResponse.ok) {
+        const profile = await profileResponse.json();
+        localStorage.setItem('user', JSON.stringify(profile));
+        return profile;
+      }
+
+      return { email: registerData.email };
+    } catch (error) {
+      console.error('Error completo:', error);
+      throw error;
+    }
+  },
+
+  logout: () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+  },
+
+  isAuthenticated: () => {
+    return !!localStorage.getItem('auth_token');
+  },
+
+  getUser: () => {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
   },
 };
 
