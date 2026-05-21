@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,10 +51,12 @@ public class TicketController {
         description = "Registra la compra definitiva y genera el ticket. Requiere los datos de la reserva confirmada.",
         security = @SecurityRequirement(name = "bearerAuth")
     )
-    @ApiResponse(responseCode = "200", description = "Ticket generado con éxito")
+    @ApiResponse(responseCode = "201", description = "Ticket generado con éxito")
     @PostMapping
-    public Ticket createTicket(@RequestBody Ticket ticket) {
+    public ResponseEntity<Ticket> createTicket(@RequestBody Ticket ticket) {
         // Podríamos sumar validaciones de stock aquí en el futuro
-        return ticketRepository.save(ticket);
+        // return ticketRepository.save(ticket);
+        Ticket nuevoticket = ticketRepository.save(ticket);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoticket);
     }
 }

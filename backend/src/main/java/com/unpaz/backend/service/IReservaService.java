@@ -7,5 +7,6 @@ public interface IReservaService {
     ReservaDTO confirmarReserva(Long reservaId);
     ReservaDTO cancelarReserva(Long reservaId);
     List<ReservaDTO> listarTodas();
+    List<ReservaDTO> obtenerReservasCliente(String email);
 
 }

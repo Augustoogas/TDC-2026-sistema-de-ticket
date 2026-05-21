@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,6 +42,24 @@ public class ReservaController {
     public ResponseEntity<List<ReservaDTO>> getAllReservas() {
         List<ReservaDTO> lista = reservaservice.listarTodas(); 
         return ResponseEntity.ok(lista);
+    }
+    
+    // para que el cliente vea solo sus propias reservas
+
+    @Operation(summary = "Listado de las reservas del cliente", description = 
+    "Permite ver todas reservas que tiene un cliente")
+    @ApiResponse(responseCode = "200", description = "Lista obtenida correctamente.")
+    @ApiResponse(responseCode = "403", description = "no se sjjs")
+    @GetMapping("/mis-reservas")
+    @PreAuthorize("hasRole('CLIENTE')")
+    public ResponseEntity<List<ReservaDTO>> misReservas(){
+        String email = SecurityContextHolder
+        .getContext()
+        .getAuthentication()
+        .getName();
+
+        List<ReservaDTO> reservas = reservaservice.obtenerReservasCliente(email);
+        return ResponseEntity.ok(reservas);
     }
 
     @Operation(

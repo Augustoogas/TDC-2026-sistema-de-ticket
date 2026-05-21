@@ -26,8 +26,6 @@ import java.util.List;
 public class EventoController {
 
     @Autowired
-    private EventoRepository eventoRepository;
-    @Autowired
     private EventoServiceImp eventoService;
     
     // Vista de todos los eventos

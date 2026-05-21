@@ -2,6 +2,7 @@ package com.unpaz.backend.controller;
 
 import com.unpaz.backend.model.Role;
 import com.unpaz.backend.model.AuthResponse;
+import com.unpaz.backend.model.Cliente;
 import com.unpaz.backend.dto.RegisterRequest;
 import com.unpaz.backend.dto.UserProfileDto;
 import com.unpaz.backend.model.Usuario;
@@ -12,6 +13,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,11 +40,12 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final UsuarioRepository usuarioRepository;
 
+    
     @Operation(summary = "Registrar nuevo usuario", description = "Crea un usuario en la base de datos y retorna un token JWT")
-    @ApiResponse(responseCode = "200", description = "Usuario registrado con éxito")
+    @ApiResponse(responseCode = "201", description = "Usuario registrado con éxito")
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
-        Usuario user = Usuario.builder()
+        Cliente user = Cliente.builder()
                 .nombre(request.getNombre())
                 .apellido(request.getApellido())
                 .email(request.getEmail())
@@ -51,7 +56,7 @@ public class AuthController {
         usuarioRepository.save(user);
         final String token = jwtService.generateToken(user);
 
-        return ResponseEntity.ok(AuthResponse.builder().token(token).build());
+        return ResponseEntity.status(HttpStatus.CREATED).body(AuthResponse.builder().token(token).build());
     }
 
     @Operation(

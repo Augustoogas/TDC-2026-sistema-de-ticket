@@ -12,5 +12,7 @@ import com.unpaz.backend.model.Reserva;
 @Repository
 public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findByEstadoAndFechaExpiracionBefore(EstadoReserva estado, LocalDateTime hora);
+    // rq 05 - que el cliente pueda ver sus reservas
+    List<Reserva> findByClienteEmail(String email);
     
 }
