@@ -18,12 +18,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReservaScheduler {
 
-    private final ReservaRepository reservaRepo;
-    private final SectorRepository sectorRepo;
+    private final ReservaRepository reservaRepository;
+    private final SectorRepository sectorRepository;
 
     @Scheduled(fixedRate = 60000) // seria cada un minuto
     public void liberarReservasExpiradas(){
-        List<Reserva> reservasExpiradas = reservaRepo.findByEstadoAndFechaExpiracionBefore(
+        List<Reserva> reservasExpiradas = reservaRepository.findByEstadoAndFechaExpiracionBefore(
             EstadoReserva.PENDIENTE, LocalDateTime.now()
         );
 
@@ -33,8 +33,8 @@ public class ReservaScheduler {
             Sector sector = reserva.getSector();
             sector.setDisponibles(sector.getDisponibles() + reserva.getCantidadEntradas());
 
-            sectorRepo.save(sector);
-            reservaRepo.save(reserva);
+            sectorRepository.save(sector);
+            reservaRepository.save(reserva);
         };
     }
 }

@@ -1,7 +1,7 @@
 package com.unpaz.backend.controller;
 
 import com.unpaz.backend.dto.ReservaDTO;
-import com.unpaz.backend.service.IReservaService;
+import com.unpaz.backend.service.ReservaService;
 import com.unpaz.backend.model.*;
 import com.unpaz.backend.repository.SectorRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,12 +22,12 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth") // La mayoría requiere autenticación
 public class ReservaController {
 
-    private final IReservaService reservaservice;
-    private final SectorRepository sectorRepo;
+    private final ReservaService reservaservice;
+    private final SectorRepository sectorRepository;
 
-    public ReservaController(IReservaService reservaService, SectorRepository sectorRepo){
+    public ReservaController(ReservaService reservaService, SectorRepository sectorRepo){
         this.reservaservice = reservaService;
-        this.sectorRepo = sectorRepo;
+        this.sectorRepository = sectorRepo;
     }
 
     @Operation(
@@ -42,24 +41,6 @@ public class ReservaController {
     public ResponseEntity<List<ReservaDTO>> getAllReservas() {
         List<ReservaDTO> lista = reservaservice.listarTodas(); 
         return ResponseEntity.ok(lista);
-    }
-    
-    // para que el cliente vea solo sus propias reservas
-
-    @Operation(summary = "Listado de las reservas del cliente", description = 
-    "Permite ver todas reservas que tiene un cliente")
-    @ApiResponse(responseCode = "200", description = "Lista obtenida correctamente.")
-    @ApiResponse(responseCode = "403", description = "no se sjjs")
-    @GetMapping("/mis-reservas")
-    @PreAuthorize("hasRole('CLIENTE')")
-    public ResponseEntity<List<ReservaDTO>> misReservas(){
-        String email = SecurityContextHolder
-        .getContext()
-        .getAuthentication()
-        .getName();
-
-        List<ReservaDTO> reservas = reservaservice.obtenerReservasCliente(email);
-        return ResponseEntity.ok(reservas);
     }
 
     @Operation(
@@ -95,7 +76,7 @@ public class ReservaController {
     @GetMapping("/sector/{id}")
     @PreAuthorize("hasAnyRole('CLIENTE', 'ADMIN')")
     public ResponseEntity<Sector> obtenerSector(@PathVariable Long id){
-        Sector sector = sectorRepo.findById(id)
+        Sector sector = sectorRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Sector no encontrado"));
             return ResponseEntity.ok(sector);
     }

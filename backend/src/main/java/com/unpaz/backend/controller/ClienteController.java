@@ -1,15 +1,17 @@
 package com.unpaz.backend.controller;
 
+import com.unpaz.backend.dto.ReservaDTO;
 import com.unpaz.backend.model.Cliente;
-import com.unpaz.backend.repository.ClienteRepository;
+import com.unpaz.backend.service.ClienteServiceImp;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,18 +23,7 @@ import java.util.List;
 public class ClienteController {
 
     @Autowired
-    private ClienteRepository clienteRepository;
-
-    @Operation(
-        summary = "Crear un nuevo cliente", 
-        description = "Registra un nuevo perfil de cliente en el sistema."
-    )
-    @ApiResponse(responseCode = "201", description = "Cliente creado con éxito")
-    @PostMapping
-    public ResponseEntity<Cliente> createCliente(@RequestBody Cliente cliente) {
-        Cliente nuevoCliente = clienteRepository.save(cliente);
-        return new ResponseEntity<>(nuevoCliente, HttpStatus.CREATED);
-    }
+    private ClienteServiceImp clienteService;
 
     @Operation(
         summary = "Listar todos los clientes", 
@@ -44,6 +35,23 @@ public class ClienteController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Cliente>> getAllClientes() {
-        return ResponseEntity.ok(clienteRepository.findAll());
+        return ResponseEntity.ok(clienteService.listarClientes());
+    }
+
+
+    @Operation(summary = "Listado de las reservas del cliente", description = 
+    "Permite ver todas reservas que tiene un cliente")
+    @ApiResponse(responseCode = "200", description = "Lista obtenida correctamente.")
+    @ApiResponse(responseCode = "403", description = "no se sjjs")
+    @GetMapping("/mis-reservas")
+    @PreAuthorize("hasRole('CLIENTE')")
+    public ResponseEntity<List<ReservaDTO>> misReservas(){
+        String email = SecurityContextHolder
+        .getContext()
+        .getAuthentication()
+        .getName();
+
+        List<ReservaDTO> reservas = clienteService.obtenerReservasCliente(email);
+        return ResponseEntity.ok(reservas);
     }
 }

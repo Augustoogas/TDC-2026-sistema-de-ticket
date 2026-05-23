@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.unpaz.backend.dto.ReservaDTO;
+import com.unpaz.backend.mapper.ReservaMapper;
 import com.unpaz.backend.repository.EventoRepository;
 import com.unpaz.backend.repository.ReservaRepository;
 import com.unpaz.backend.repository.SectorRepository;
@@ -19,12 +20,13 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class ReservaServiceImp implements IReservaService {
+public class ReservaServiceImp implements ReservaService {
 
-    private final ReservaRepository reservaRepo;
-    private final EventoRepository eventoRepo;
-    private final UsuarioRepository userRepo;
-    private final SectorRepository sectorRepo;
+    private final ReservaRepository reservaRepository;
+    private final EventoRepository eventoRepository;
+    private final UsuarioRepository userRepository;
+    private final SectorRepository sectorRepository;
+    private final ReservaMapper reservaMapper;
 
     private final static int MINUTOS_EXPIRACION = 15;
     private final static int MAXIMO_ENTRADAS = 10;
@@ -32,10 +34,10 @@ public class ReservaServiceImp implements IReservaService {
     @Override
     public List<ReservaDTO> listarTodas() {
         
-        List<Reserva> reservas = reservaRepo.findAll();
+        List<Reserva> reservas = reservaRepository.findAll();
         
         return reservas.stream()
-                       .map(this::mapearDTO)
+                       .map(reservaMapper::meppearDTO)
                        .collect(Collectors.toList());
     }
 
@@ -45,14 +47,14 @@ public class ReservaServiceImp implements IReservaService {
 
         validarDatosEntrada(reservaDTO, clienteId);
 
-        Usuario usuario = userRepo.findById(clienteId)
+        Usuario usuario = userRepository.findById(clienteId)
             .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
         if(!(usuario instanceof Cliente cliente)){
             throw new RuntimeException("El usuario no es un cliente válido");}
 
-        Evento evento = eventoRepo.findById(reservaDTO.getEventoId())
+        Evento evento = eventoRepository.findById(reservaDTO.getEventoId())
             .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
-        Sector sector = sectorRepo.findById(reservaDTO.getSectorId())
+        Sector sector = sectorRepository.findById(reservaDTO.getSectorId())
             .orElseThrow(() ->new RuntimeException("Sector no encontrado"));
 
 //
@@ -61,9 +63,9 @@ public class ReservaServiceImp implements IReservaService {
         descontarDisponibles(sector, reservaDTO.getCantidadEntradas());
 
         Reserva reserva = crearReserva(reservaDTO, cliente, evento, sector);
-        Reserva reservaGuardada = reservaRepo.save(reserva);
+        Reserva reservaGuardada = reservaRepository.save(reserva);
 
-        return mapearDTO(reservaGuardada);
+        return reservaMapper.meppearDTO(reservaGuardada);
     }
 
 
@@ -88,7 +90,7 @@ public class ReservaServiceImp implements IReservaService {
     // metodo para descontar la cantidad de entradas disponibles.
     private void descontarDisponibles(Sector sector, int cantidad){
         sector.setDisponibles(sector.getDisponibles() - cantidad);
-        sectorRepo.save(sector);
+        sectorRepository.save(sector);
     }
 
     private Reserva crearReserva(ReservaDTO reservaDTO, Cliente cliente, Evento evento, Sector sector){
@@ -112,7 +114,7 @@ public class ReservaServiceImp implements IReservaService {
     @Override
     @Transactional
     public ReservaDTO confirmarReserva(Long reservaId){
-        Reserva reserva = reservaRepo.findById(reservaId)
+        Reserva reserva = reservaRepository.findById(reservaId)
         .orElseThrow(() -> new RuntimeException("Reserva no encontrada."));
 
         // validacion de estado
@@ -120,16 +122,16 @@ public class ReservaServiceImp implements IReservaService {
 
         reserva.setEstado(EstadoReserva.PAGADA);
 
-        Reserva reservaGuardada = reservaRepo.save(reserva);
+        Reserva reservaGuardada = reservaRepository.save(reserva);
 
-        return mapearDTO(reservaGuardada);
+        return reservaMapper.meppearDTO(reservaGuardada);
     }
 
     // cancelar
     @Override
     @Transactional
     public ReservaDTO cancelarReserva(Long reservaId){
-        Reserva reserva = reservaRepo.findById(reservaId)
+        Reserva reserva = reservaRepository.findById(reservaId)
         .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
 
         // validar que no este espirada, cancelada o confirmada
@@ -140,42 +142,10 @@ public class ReservaServiceImp implements IReservaService {
         //actualizamos la info del sector.
         Sector sector = reserva.getSector();
         sector.setDisponibles(sector.getDisponibles() + reserva.getCantidadEntradas());
-        sectorRepo.save(sector);
+        sectorRepository.save(sector);
 
-        Reserva reservaGuardadaCancelada = reservaRepo.save(reserva);
+        Reserva reservaGuardadaCancelada = reservaRepository.save(reserva);
         
-        return mapearDTO(reservaGuardadaCancelada);
+        return reservaMapper.meppearDTO(reservaGuardadaCancelada);
     }
-    
-
-    // crear un paquete aparte para el mapper
-    private ReservaDTO mapearDTO(
-            Reserva reserva
-    ){
-
-        ReservaDTO dto = new ReservaDTO();
-        dto.setReservaId(reserva.getId());
-        dto.setEventoId(reserva.getEvento().getEventoId());
-        dto.setNombreEvento(reserva.getEvento().getTitulo());
-        dto.setMontoTotal(reserva.getMontoTotal());
-        dto.setEstado(reserva.getEstado());
-        dto.setFechaExpiracion(reserva.getFechaExpiracion());
-        dto.setSectorId(reserva.getSector().getSectorId());
-        dto.setCantidadEntradas(reserva.getCantidadEntradas());
-        dto.setNombreSector(reserva.getSector().getNombre());
-
-        return dto;
-    }
-
-    @Override
-    public List<ReservaDTO> obtenerReservasCliente(String email) {
-        List<Reserva> reservas = reservaRepo.findByClienteEmail(email);
-
-        return reservas.stream()
-            .filter(reserva -> EstadoReserva.PAGADA.equals(reserva.getEstado()))
-            .map(this::mapearDTO)
-            .collect(Collectors.toList());
-            //solo las que estan pagadas
-    }
-
 }
