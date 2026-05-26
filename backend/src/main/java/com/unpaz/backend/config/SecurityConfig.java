@@ -4,6 +4,7 @@ import com.unpaz.backend.service.UserDetailsServiceImpl;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -38,13 +39,15 @@ public class SecurityConfig {
             .headers(headers -> headers.frameOptions(frame -> frame.disable())) 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/v3/api-docs/**").permitAll()
-                .requestMatchers("/swagger-ui/**").permitAll()
+               .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/swagger-ui.html").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll() 
-                .requestMatchers("/api/eventos/**").permitAll()
+               .requestMatchers("/api/eventos/**").permitAll() 
+                .requestMatchers("/api/tickets/**").permitAll()
                 .requestMatchers("/api/register/**").permitAll()
                 .anyRequest().authenticated()
+            		//.anyRequest().permitAll()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())

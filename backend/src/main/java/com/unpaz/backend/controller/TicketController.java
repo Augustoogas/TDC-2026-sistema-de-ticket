@@ -1,7 +1,11 @@
 package com.unpaz.backend.controller;
 
 import com.unpaz.backend.model.Ticket;
+import com.unpaz.backend.service.TicketPdfService;
+import com.unpaz.backend.service.TicketService;
 import com.unpaz.backend.repository.TicketRepository;
+
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,6 +13,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+
 
 import java.util.List;
 
@@ -17,7 +25,13 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 @Tag(name = "Tickets", description = "Endpoints para la generación y consulta de comprobantes de entrada")
 public class TicketController {
+	private TicketService ticketService = null; 
+	public TicketController(TicketService ticketService) {
+        this.ticketService = ticketService;
+    }
 
+	@Autowired
+	private TicketPdfService ticketPdfService; 
     @Autowired
     private TicketRepository ticketRepository;
 
@@ -54,5 +68,17 @@ public class TicketController {
     public Ticket createTicket(@RequestBody Ticket ticket) {
         // Podríamos sumar validaciones de stock aquí en el futuro
         return ticketRepository.save(ticket);
+    }
+    
+    @GetMapping("/{id}/download")
+    public ResponseEntity<byte[]> descargarTicket(@PathVariable Long id) {
+    	Ticket ticket = ticketService.findById(id);
+        byte[] pdf = ticketPdfService.generarTicketPDF(ticket);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("filename", "ticket-" + id + ".pdf");
+
+        return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
     }
 }
