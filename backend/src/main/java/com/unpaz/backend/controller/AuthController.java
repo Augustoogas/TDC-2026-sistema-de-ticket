@@ -1,7 +1,9 @@
 package com.unpaz.backend.controller;
 
 import com.unpaz.backend.model.Role;
+import com.unpaz.backend.model.Admin;
 import com.unpaz.backend.model.AuthResponse;
+import com.unpaz.backend.model.Cliente;
 import com.unpaz.backend.dto.RegisterRequest;
 import com.unpaz.backend.dto.UserProfileDto;
 import com.unpaz.backend.model.Usuario;
@@ -36,23 +38,46 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final UsuarioRepository usuarioRepository;
 
+
+    // Solo registra en usuarios -> clientes
     @Operation(summary = "Registrar nuevo usuario", description = "Crea un usuario en la base de datos y retorna un token JWT")
-    @ApiResponse(responseCode = "200", description = "Usuario registrado con éxito")
+    @ApiResponse(responseCode = "201", description = "Usuario registrado con éxito")
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
-        Usuario user = Usuario.builder()
+        Cliente cliente = Cliente.builder()
                 .nombre(request.getNombre())
                 .apellido(request.getApellido())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole() != null ? Role.valueOf(request.getRole().toUpperCase()) : Role.CLIENTE)
+                .role(Role.CLIENTE)
                 .build();
 
-        usuarioRepository.save(user);
-        final String token = jwtService.generateToken(user);
-
+        usuarioRepository.save(cliente);
+        final String token = jwtService.generateToken(cliente);
         return ResponseEntity.ok(AuthResponse.builder().token(token).build());
     }
+
+    
+    // Solo registra en usuarios -> admins
+    @Operation(summary = "Registrar nuevo administrador", description = "Endpoint protegido. Solo un ADMIN puede registrar a otro ADMIN.")
+    @PostMapping("/register-admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<AuthResponse> registerAdmin(@RequestBody RegisterRequest request) {
+        Admin admin = Admin.builder()
+                .nombre(request.getNombre())
+                .apellido(request.getApellido())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.ADMIN)
+                .build();
+
+        usuarioRepository.save(admin);
+        final String token = jwtService.generateToken(admin);
+        return ResponseEntity.ok(AuthResponse.builder().token(token).build());
+    }
+
+//
 
     @Operation(
         summary = "Obtener perfil del usuario actual", 

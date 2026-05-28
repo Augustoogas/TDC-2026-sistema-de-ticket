@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -24,18 +23,6 @@ public class AdminController {
 
     @Autowired
     private AdminRepository adminRepository;
-
-    @Operation(
-        summary = "Crear un nuevo administrador", 
-        description = "Endpoint restringido. Permite que un administrador existente registre a otro."
-    )
-    @ApiResponse(responseCode = "201", description = "Admin creado con éxito")
-    @ApiResponse(responseCode = "403", description = "Acceso denegado - Se requiere rol ADMIN")
-    @PostMapping
-    public ResponseEntity<Admin> createAdmin(@RequestBody Admin admin) {
-        Admin nuevoAdmin = adminRepository.save(admin);
-        return new ResponseEntity<>(nuevoAdmin, HttpStatus.CREATED);
-    }
 
     @Operation(
         summary = "Listar todos los administradores", 
