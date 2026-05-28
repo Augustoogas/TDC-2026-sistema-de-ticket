@@ -1,6 +1,7 @@
 package com.unpaz.backend.service;
 
 import com.unpaz.backend.dto.EventoDto;
+import com.unpaz.backend.mapper.EventoMapper;
 import com.unpaz.backend.model.Admin;
 import com.unpaz.backend.model.Evento;
 import com.unpaz.backend.model.Locacion;
@@ -22,13 +23,14 @@ public class EventoServiceImp {
     private final EventoRepository eventoRepository;
     private final AdminRepository adminRepository;
     private final LocacionRepository locacionRepository;
+    private final EventoMapper eventoMapper;
 
 
     public List<EventoDto> listarEventos(){
 
         return eventoRepository.findAll()
                 .stream()
-                .map(this::mapearDTO)
+                .map(eventoMapper::mapearDTO)
                 .toList();
     }
 
@@ -37,7 +39,7 @@ public class EventoServiceImp {
         return eventoRepository
                 .findByTituloContainingIgnoreCaseOrTipoContainingIgnoreCaseOrLocacionNombreContainingIgnoreCase(q,q,q)
                 .stream()
-                .map(this::mapearDTO)
+                .map(eventoMapper::mapearDTO)
                 .collect(Collectors.toList());
     }
 
@@ -62,28 +64,7 @@ public class EventoServiceImp {
 
         Evento eventoGuardado = eventoRepository.save(evento);
 
-        return mapearDTO(eventoGuardado);
+        return eventoMapper.mapearDTO(eventoGuardado);
 
-    }
-
-    private EventoDto mapearDTO(Evento evento){
-
-        EventoDto dto = new EventoDto();
-
-        dto.setEventoId(evento.getEventoId());
-        dto.setTitulo(evento.getTitulo());
-        dto.setTipo(evento.getTipo());
-        dto.setDescripcion(evento.getDescripcion());
-
-        if(evento.getCreador() != null){
-            dto.setCreadorId(evento.getCreador().getUsuarioId());
-            dto.setCreadorNombre(evento.getCreador().getNombre() + " " + evento.getCreador().getApellido());
-        }
-
-        if(evento.getLocacion() != null){
-            dto.setLocacionId(evento.getLocacion().getIdLocacion());
-            dto.setLocacionNombre(evento.getLocacion().getNombre());
-        }
-        return dto;
     }
 }
