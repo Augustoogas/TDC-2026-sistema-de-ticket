@@ -1,5 +1,6 @@
 import { AppBar, Toolbar, Box, Typography, Button, IconButton } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { AuthService } from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
 
 // ICONOS
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
@@ -11,6 +12,8 @@ import HelpOutlineIcon from '@mui/icons-material/Help';
 import InfoIcon from '@mui/icons-material/Info';
 import LoginIcon from '@mui/icons-material/Login';
 import MenuIcon from '@mui/icons-material/Menu';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 // EFECTO HOVER PARA BOTONES DE NAVEGACIÓN
 const navButtonStyle = {
@@ -42,6 +45,14 @@ const navButtonStyle = {
 };
 
 export default function Header() {
+  const user = AuthService.getUser();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    AuthService.logout();
+    navigate('/');
+  };
+
   return (
     <AppBar
       position="sticky"
@@ -59,7 +70,7 @@ export default function Header() {
         }}
       >
         {/* IZQUIERDA */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: user ? 2 : 5 }}>
           {/* LOGO */}
           <Box
             component={Link}
@@ -79,7 +90,7 @@ export default function Header() {
           </Box>
 
           {/* NAV */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Button
               component={Link}
               to="/events"
@@ -116,7 +127,7 @@ export default function Header() {
         <Box sx={{ flexGrow: 1 }} />
 
         {/* DERECHA */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: user ? 1 : 2 }}>
           <Button
             component={Link}
             to="/my-tickets"
@@ -147,15 +158,35 @@ export default function Header() {
             Nosotros
           </Button>
 
-          <Button
-            component={Link}
-            to="/login"
-            variant="outlined"
-            startIcon={<LoginIcon />}
-          >
-            Login
-          </Button>
-
+          {user ? (
+            <>
+              <Button
+                component={Link}
+                to="/profile"
+                startIcon={<AccountCircleIcon />}
+                color="inherit"
+                sx={navButtonStyle}
+              >
+                Perfil
+              </Button>
+              <Button
+                onClick={handleLogout}
+                startIcon={<LogoutIcon />}
+                variant="outlined"
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <Button
+              component={Link}
+              to="/login"
+              variant="outlined"
+              startIcon={<LoginIcon />}
+            >
+              Login
+            </Button>
+          )}
           <IconButton sx={{ display: { md: 'none' } }}>
             <MenuIcon />
           </IconButton>
