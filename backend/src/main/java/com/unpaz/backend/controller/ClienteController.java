@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,17 +21,6 @@ public class ClienteController {
 
     @Autowired
     private ClienteRepository clienteRepository;
-
-    @Operation(
-        summary = "Crear un nuevo cliente", 
-        description = "Registra un nuevo perfil de cliente en el sistema."
-    )
-    @ApiResponse(responseCode = "201", description = "Cliente creado con éxito")
-    @PostMapping
-    public ResponseEntity<Cliente> createCliente(@RequestBody Cliente cliente) {
-        Cliente nuevoCliente = clienteRepository.save(cliente);
-        return new ResponseEntity<>(nuevoCliente, HttpStatus.CREATED);
-    }
 
     @Operation(
         summary = "Listar todos los clientes", 
