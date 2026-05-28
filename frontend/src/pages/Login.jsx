@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthService } from '../services/api';
 
 import { Box, Paper, Typography, TextField, Button, Stack } from '@mui/material';
@@ -8,6 +8,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isRegister, setIsRegister] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -41,7 +42,7 @@ const Login = () => {
           throw new Error('Email y contraseña son requeridos');
         }
         await AuthService.login(formData.email, formData.password);
-        navigate('/');
+        navigate(location.state?.from || '/', { replace: true }); //Redirecciona a la página anterior o al home
       }
     } catch (err) {
       alert(err.message);

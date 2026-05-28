@@ -180,8 +180,6 @@ const getAuthHeaders = () => {
 
 export const AuthService = {
   login: async (email, password) => {
-    console.log('Enviando login para:', email);
-
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
@@ -193,16 +191,12 @@ export const AuthService = {
         credentials: 'omit',
       });
 
-      console.log('Response status:', response.status);
-
       const responseText = await response.text();
-      console.log('Response body:', responseText);
 
       if (!response.ok) {
         let errorMessage = `Error ${response.status}`;
         try {
           const errorData = JSON.parse(responseText);
-          console.log('Error data:', errorData);
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch {
           errorMessage = responseText || errorMessage;
@@ -211,7 +205,6 @@ export const AuthService = {
       }
 
       const data = JSON.parse(responseText);
-      console.log('Login exitoso');
       localStorage.setItem('auth_token', data.token);
 
       // Obtener perfil del usuario
@@ -223,12 +216,13 @@ export const AuthService = {
       if (profileResponse.ok) {
         const profile = await profileResponse.json();
         localStorage.setItem('user', JSON.stringify(profile));
+
         return profile;
       }
 
       return { email };
     } catch (error) {
-      console.error('Error completo:', error);
+      console.error('Login error:', error.message);
       throw error;
     }
   },
@@ -242,8 +236,6 @@ export const AuthService = {
       role: registerData.role || 'CLIENTE',
     };
 
-    console.log('Enviando registro:', payload);
-
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
@@ -255,28 +247,21 @@ export const AuthService = {
         credentials: 'omit',
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', {
-        'content-type': response.headers.get('content-type'),
-      });
-
       const responseText = await response.text();
-      console.log('Response body:', responseText);
 
       if (!response.ok) {
         let errorMessage = `Error ${response.status}`;
         try {
           const errorData = JSON.parse(responseText);
-          console.log('Error data:', errorData);
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch {
           errorMessage = responseText || errorMessage;
         }
+
         throw new Error(errorMessage);
       }
 
       const data = JSON.parse(responseText);
-      console.log('Registro exitoso, token:', data.token);
       localStorage.setItem('auth_token', data.token);
 
       // Obtener perfil del usuario
@@ -288,14 +273,20 @@ export const AuthService = {
       if (profileResponse.ok) {
         const profile = await profileResponse.json();
         localStorage.setItem('user', JSON.stringify(profile));
+
         return profile;
       }
 
       return { email: registerData.email };
     } catch (error) {
-      console.error('Error completo:', error);
+      console.error('Register error:', error.message);
       throw error;
     }
+  },
+
+  getUser: () => {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
   },
 
   logout: () => {
@@ -303,13 +294,12 @@ export const AuthService = {
     localStorage.removeItem('user');
   },
 
-  isAuthenticated: () => {
-    return !!localStorage.getItem('auth_token');
+  getToken: () => {
+    return localStorage.getItem('auth_token');
   },
 
-  getUser: () => {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+  isAuthenticated: () => {
+    return !!localStorage.getItem('auth_token');
   },
 };
 
