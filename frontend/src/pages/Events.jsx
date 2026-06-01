@@ -12,6 +12,8 @@ import {
   Box,
   CircularProgress,
   useTheme,
+  Chip,
+  Stack,
 } from '@mui/material';
 
 import { EventService } from '../services/api';
@@ -23,27 +25,43 @@ const Events = () => {
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [categorias, setCategorias] = useState([]);
+  const [selectedCategoria, setSelectedCategoria] = useState(null);
 
-  // FETCH EVENTOS
+  // FETCH EVENTOS Y CATEGORÍAS
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchData = async () => {
       try {
-        const data = await EventService.getAllEvents();
-        setEventos(data);
+        const [eventosData, categoriasData] = await Promise.all([
+          EventService.getAllEvents(),
+          EventService.getEventoCategorias(),
+        ]);
+        setEventos(eventosData);
+        setCategorias(categoriasData);
       } catch (error) {
-        console.error('Error cargando eventos:', error);
+        console.error('Error cargando datos:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEvents();
+    fetchData();
   }, []);
 
-  // FILTRO BUSQUEDA
-  const eventosFiltrados = eventos.filter((evento) =>
-    evento.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // FILTRO BÚSQUEDA Y CATEGORÍA
+  const eventosFiltrados = eventos.filter((evento) => {
+    const cumpleBusqueda = evento.nombre
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const cumpleCategoria =
+      selectedCategoria === null || evento.categoriaId === selectedCategoria;
+    return cumpleBusqueda && cumpleCategoria;
+  });
+
+  // OBTENER NOMBRE Y ICONO DE CATEGORÍA
+  const obtenerCategoria = (categoriaId) => {
+    return categorias.find((c) => c.id === categoriaId);
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -59,7 +77,7 @@ const Events = () => {
       </Box>
 
       {/* BUSCADOR */}
-      <Box sx={{ mb: 6, display: 'flex', justifyContent: 'center' }}>
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
         <TextField
           fullWidth
           variant="outlined"
@@ -69,6 +87,44 @@ const Events = () => {
           sx={{ maxWidth: 500 }}
         />
       </Box>
+
+      {/* FILTROS DE CATEGORÍA */}
+      {!loading && categorias.length > 0 && (
+        <Box sx={{ mb: 6 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ mb: 2, fontWeight: 600, textAlign: 'center' }}
+          >
+            Categorías
+          </Typography>
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}
+          >
+            <Chip
+              label="Todos"
+              onClick={() => setSelectedCategoria(null)}
+              variant={selectedCategoria === null ? 'filled' : 'outlined'}
+              color={selectedCategoria === null ? 'primary' : 'default'}
+              sx={{ cursor: 'pointer' }}
+            />
+            {categorias.map((cat) => (
+              <Chip
+                key={cat.id}
+                label={`${cat.icon} ${cat.nombre}`}
+                onClick={() => setSelectedCategoria(cat.id)}
+                variant={selectedCategoria === cat.id ? 'filled' : 'outlined'}
+                color={selectedCategoria === cat.id ? 'primary' : 'default'}
+                sx={{ cursor: 'pointer' }}
+              />
+            ))}
+          </Stack>
+        </Box>
+      )}
 
       {/* GRID DE EVENTOS */}
       {loading ? (
@@ -87,84 +143,105 @@ const Events = () => {
             gap: 3.5,
           }}
         >
-          {eventosFiltrados.map((evento) => (
-            <Card
-              key={evento.id_evento}
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <CardActionArea
-                onClick={() => navigate(`/event/${evento.id_evento}`)}
+          {eventosFiltrados.map((evento) => {
+            const categoria = obtenerCategoria(evento.categoriaId);
+            return (
+              <Card
+                key={evento.id_evento}
                 sx={{
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  alignItems: 'stretch',
                 }}
               >
-                <Box
+                <CardActionArea
+                  onClick={() => navigate(`/event/${evento.id_evento}`)}
                   sx={{
-                    position: 'relative',
-                    width: '100%',
-                    aspectRatio: '16 / 9',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={
-                      evento.imagen ||
-                      'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=500'
-                    }
-                    alt={evento.nombre}
-                    sx={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
-                    }}
-                  />
-                </Box>
-
-                {/* CONTENT */}
-                <CardContent
-                  sx={{
-                    flexGrow: 1,
-                    py: 2,
-                    px: 2,
+                    height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: 0.5,
+                    alignItems: 'stretch',
                   }}
                 >
-                  <Typography
-                    variant="h6"
+                  <Box
                     sx={{
-                      fontWeight: 500,
-                      lineHeight: 1.2,
-                      mb: 1.5,
+                      position: 'relative',
+                      width: '100%',
+                      aspectRatio: '16 / 9',
+                      overflow: 'hidden',
                     }}
                   >
-                    {evento.nombre}
-                  </Typography>
+                    <CardMedia
+                      component="img"
+                      image={
+                        evento.imagen ||
+                        'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=500'
+                      }
+                      alt={evento.nombre}
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
+                    />
+                    {/* BADGE DE CATEGORÍA */}
+                    {categoria && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          backgroundColor: theme.palette.background.transparent,
+                          color: theme.palette.text.primary,
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {categoria.icon} {categoria.nombre}
+                      </Box>
+                    )}
+                  </Box>
 
-                  <Typography
-                    variant="body2"
+                  {/* CONTENT */}
+                  <CardContent
                     sx={{
-                      color: theme.palette.text.secondary,
-                      lineHeight: 1.3,
-                      mb: 0.5,
+                      flexGrow: 1,
+                      py: 2,
+                      px: 2,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 0.5,
                     }}
                   >
-                    {evento.fecha}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          ))}
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 500,
+                        lineHeight: 1.2,
+                        mb: 1.5,
+                      }}
+                    >
+                      {evento.nombre}
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        lineHeight: 1.3,
+                        mb: 0.5,
+                      }}
+                    >
+                      {evento.fecha}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            );
+          })}
         </Box>
       )}
 

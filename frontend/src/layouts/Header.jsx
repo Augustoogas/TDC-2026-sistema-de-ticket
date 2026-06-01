@@ -103,12 +103,12 @@ export default function Header() {
 
             <Button
               component={Link}
-              to="/featured"
+              to="/upcoming-events"
               startIcon={<StarIcon />}
               color="inherit"
               sx={navButtonStyle}
             >
-              Destacados
+              Proximos Eventos
             </Button>
 
             <Button
