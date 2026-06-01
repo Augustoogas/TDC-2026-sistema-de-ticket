@@ -61,6 +61,15 @@ let categorias = getLocal('ticketflow_categorias', [
   { id: 'C3', nombre: 'Platea', precioBase: 4000, color: '#32cd32' },
 ]);
 
+let eventoCategorias = getLocal('ticketflow_evento_categorias', [
+  { id: 'EC1', nombre: 'Música', icon: '🎵' },
+  { id: 'EC2', nombre: 'Teatro', icon: '🎭' },
+  { id: 'EC3', nombre: 'Danza', icon: '💃' },
+  { id: 'EC4', nombre: 'Cine', icon: '🎬' },
+  { id: 'EC5', nombre: 'Comedia', icon: '😂' },
+  { id: 'EC6', nombre: 'Tecnología', icon: '💻' },
+]);
+
 let events = getLocal('ticketflow_events', Object.values(EVENT_DATA));
 
 // --- SERVICIOS ---
@@ -141,6 +150,10 @@ export const EventService = {
     events = events.filter((e) => e.id_evento !== id);
     setLocal('ticketflow_events', events);
     return { success: true };
+  },
+  getEventoCategorias: async () => {
+    await delay(200);
+    return eventoCategorias;
   },
 };
 

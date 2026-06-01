@@ -6,6 +6,8 @@ import AdminRoute from './routes/AdminRoute';
 
 import Home from './pages/Home';
 import Events from './pages/Events';
+import UpcomingEvents from './pages/UpcomingEvents';
+import MyTickets from './pages/MyTickets';
 import EventDetail from './pages/EventDetail';
 import About from './pages/About';
 import Help from './pages/Help';
@@ -30,6 +32,8 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/events" element={<Events />} />
+          <Route path="/upcoming-events" element={<UpcomingEvents />} />
+          <Route path="/my-tickets" element={<MyTickets />} />
           <Route path="/event/:id" element={<EventDetail />} />
           <Route path="/about" element={<About />} />
           <Route path="/help" element={<Help />} />

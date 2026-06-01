@@ -7,6 +7,7 @@ export const EVENT_DATA = {
       'La Filarmónica Universitaria presenta un repertorio clásico con invitados especiales de la escena nacional.',
     imagen:
       'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=800',
+    categoriaId: 'EC1',
     filas: [
       {
         letra: 'A',
@@ -47,6 +48,7 @@ export const EVENT_DATA = {
       'Una obra inmersiva de vanguardia que rompe la cuarta pared. Capacidad limitada para una experiencia íntima.',
     imagen:
       'https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=1469&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    categoriaId: 'EC2',
     filas: [
       {
         letra: 'A',
@@ -67,6 +69,7 @@ export const EVENT_DATA = {
       'Más de 50 voces en escena interpretando clásicos del rock nacional en formato coral.',
     imagen:
       'https://images.unsplash.com/photo-1610254449353-5698372fa83b?q=80&w=1648&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    categoriaId: 'EC1',
     filas: [
       { letra: 'A', nombre: 'Palcos', precio: 3000, color: '#2E7D32', asientos: 12 },
       { letra: 'B', nombre: 'Platea', precio: 1800, color: '#EF6C00', asientos: 10 },
@@ -88,6 +91,7 @@ export const EVENT_DATA = {
       'Muestra anual de la cátedra de Danza. Expresión corporal y movimiento en un entorno único.',
     imagen:
       'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=800',
+    categoriaId: 'EC3',
     filas: [
       { letra: 'A', nombre: 'Palcos', precio: 2800, color: '#2E7D32', asientos: 8 },
       { letra: 'B', nombre: 'Platea', precio: 1500, color: '#EF6C00', asientos: 12 },
@@ -110,6 +114,7 @@ export const EVENT_DATA = {
       'Bandas emergentes y artistas invitados en una noche dedicada al jazz.',
     imagen:
       'https://images.unsplash.com/photo-1725830071503-d705ef4a0975?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    categoriaId: 'EC1',
     filas: [
       { letra: 'A', nombre: 'VIP', precio: 4200, color: '#2E7D32', asientos: 10 },
       { letra: 'B', nombre: 'Platea', precio: 2500, color: '#EF6C00', asientos: 14 },
@@ -129,6 +134,7 @@ export const EVENT_DATA = {
     fecha: 'Sábado 11 de Noviembre - 22:00 hs',
     descripcion: 'Una noche de comedia con comediantes locales y nacionales.',
     imagen: 'https://images.unsplash.com/photo-1527224857830-43a7acc85260?w=800',
+    categoriaId: 'EC5',
     filas: [
       { letra: 'A', nombre: 'VIP', precio: 3000, color: '#2E7D32', asientos: 8 },
       {
@@ -148,6 +154,7 @@ export const EVENT_DATA = {
     descripcion:
       'Descubrí nuevas bandas del circuito indie en un evento al aire libre.',
     imagen: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800',
+    categoriaId: 'EC1',
     filas: [
       {
         letra: 'A',
@@ -172,6 +179,7 @@ export const EVENT_DATA = {
     fecha: 'Miércoles 15 de Noviembre - 20:00 hs',
     descripcion: 'Proyección de películas icónicas con debate posterior.',
     imagen: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800',
+    categoriaId: 'EC4',
     filas: [
       { letra: 'A', nombre: 'Platea', precio: 1200, color: '#EF6C00', asientos: 20 },
       { letra: 'B', nombre: 'General', precio: 800, color: '#1565C0', asientos: 30 },
@@ -185,6 +193,7 @@ export const EVENT_DATA = {
     descripcion: 'Experiencia interactiva con videojuegos, VR y tecnología.',
     imagen:
       'https://images.unsplash.com/photo-1633545495735-25df17fb9f31?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    categoriaId: 'EC6',
     filas: [
       {
         letra: 'A',
