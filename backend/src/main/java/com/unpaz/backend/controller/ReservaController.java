@@ -1,7 +1,7 @@
 package com.unpaz.backend.controller;
 
 import com.unpaz.backend.dto.ReservaDTO;
-import com.unpaz.backend.service.IReservaService;
+import com.unpaz.backend.service.ReservaService;
 import com.unpaz.backend.model.*;
 import com.unpaz.backend.repository.SectorRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +24,10 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth") // La mayoría requiere autenticación
 public class ReservaController {
 
-    private final IReservaService reservaservice;
+    private final ReservaService reservaservice;
     private final SectorRepository sectorRepo;
 
-    public ReservaController(IReservaService reservaService, SectorRepository sectorRepo){
+    public ReservaController(ReservaService reservaService, SectorRepository sectorRepo){
         this.reservaservice = reservaService;
         this.sectorRepo = sectorRepo;
     }
@@ -47,12 +49,16 @@ public class ReservaController {
         summary = "Crear reserva temporal", 
         description = "Crea una reserva en estado pendiente. Accesible para Clientes y Admins."
     )
-    @ApiResponse(responseCode = "200", description = "Reserva creada con éxito")
+    @ApiResponse(responseCode = "201", description = "Reserva creada con éxito")
     @PostMapping("/{clienteId}")
     @PreAuthorize("hasAnyRole('CLIENTE', 'ADMIN')")
-    public ResponseEntity<ReservaDTO> crear(@Valid @RequestBody ReservaDTO dto, @PathVariable Long clienteId) {
-        ReservaDTO respuesta = reservaservice.crearReservaTemporal(dto, clienteId);
-        return ResponseEntity.ok(respuesta);
+    public ResponseEntity<?> crear(@Valid @RequestBody ReservaDTO dto, @PathVariable Long clienteId) {
+        try{
+            ReservaDTO respuesta = reservaservice.crearReservaTemporal(dto, clienteId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
+        } catch (RuntimeException e){
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
     }
 
     @Operation(summary = "Cancelar una reserva", description = "Cambia el estado de la reserva a CANCELADA.")

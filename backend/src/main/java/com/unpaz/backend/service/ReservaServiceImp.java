@@ -4,29 +4,29 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.unpaz.backend.dto.ReservaDTO;
+import com.unpaz.backend.mapper.ReservaMapper;
 import com.unpaz.backend.repository.EventoRepository;
 import com.unpaz.backend.repository.ReservaRepository;
 import com.unpaz.backend.repository.SectorRepository;
 import com.unpaz.backend.repository.UsuarioRepository;
 import com.unpaz.backend.model.*;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 
 
 @Service
 @RequiredArgsConstructor
-public class ReservaServiceImp implements IReservaService {
+public class ReservaServiceImp implements ReservaService {
 
     private final ReservaRepository reservaRepo;
     private final EventoRepository eventoRepo;
     private final UsuarioRepository userRepo;
     private final SectorRepository sectorRepo;
+    private final ReservaMapper reservaMapper;
 
     private final static int MINUTOS_EXPIRACION = 15;
     private final static int MAXIMO_ENTRADAS = 10;
@@ -37,7 +37,7 @@ public class ReservaServiceImp implements IReservaService {
         List<Reserva> reservas = reservaRepo.findAll();
         
         return reservas.stream()
-                       .map(this::mapearDTO)
+                       .map(reservaMapper::meppearDTO)
                        .collect(Collectors.toList());
     }
 
@@ -54,10 +54,10 @@ public class ReservaServiceImp implements IReservaService {
 
         Evento evento = eventoRepo.findById(reservaDTO.getEventoId())
             .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
-        Sector sector = sectorRepo.findById(reservaDTO.getSectorId())
+        Sector sector = sectorRepo.findByIdForUpdate(reservaDTO.getSectorId())
             .orElseThrow(() ->new RuntimeException("Sector no encontrado"));
 
-//
+//y sol
 
         validarDisponibilidad(sector, reservaDTO.getCantidadEntradas());
         descontarDisponibles(sector, reservaDTO.getCantidadEntradas());
@@ -65,7 +65,7 @@ public class ReservaServiceImp implements IReservaService {
         Reserva reserva = crearReserva(reservaDTO, cliente, evento, sector);
         Reserva reservaGuardada = reservaRepo.save(reserva);
 
-        return mapearDTO(reservaGuardada);
+        return reservaMapper.meppearDTO(reservaGuardada);
     }
 
 
@@ -124,7 +124,7 @@ public class ReservaServiceImp implements IReservaService {
 
         Reserva reservaGuardada = reservaRepo.save(reserva);
 
-        return mapearDTO(reservaGuardada);
+        return reservaMapper.meppearDTO(reservaGuardada);
     }
 
     // cancelar
@@ -146,26 +146,6 @@ public class ReservaServiceImp implements IReservaService {
 
         Reserva reservaGuardadaCancelada = reservaRepo.save(reserva);
         
-        return mapearDTO(reservaGuardadaCancelada);
-    }
-
-
-    // crear un paquete aparte para el mapper
-    private ReservaDTO mapearDTO(
-            Reserva reserva
-    ){
-
-        ReservaDTO dto = new ReservaDTO();
-        dto.setReservaId(reserva.getId());
-        dto.setEventoId(reserva.getEvento().getEventoId());
-        dto.setNombreEvento(reserva.getEvento().getTitulo());
-        dto.setMontoTotal(reserva.getMontoTotal());
-        dto.setEstado(reserva.getEstado());
-        dto.setFechaExpiracion(reserva.getFechaExpiracion());
-        dto.setSectorId(reserva.getSector().getSectorId());
-        dto.setCantidadEntradas(reserva.getCantidadEntradas());
-        dto.setNombreSector(reserva.getSector().getNombre());
-
-        return dto;
+        return reservaMapper.meppearDTO(reservaGuardadaCancelada);
     }
 }
