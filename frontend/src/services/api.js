@@ -180,7 +180,7 @@ export const AdminService = {
 };
 
 // --- CONFIGURACIÓN BASE ---
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://localhost:8081/api';
 
 // --- HELPER PARA AGREGAR TOKEN A LAS PETICIONES ---
 const getAuthHeaders = () => {
