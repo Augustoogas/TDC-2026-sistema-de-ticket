@@ -56,6 +56,8 @@ public class AuthController {
         final String token = jwtService.generateToken(cliente);
         return ResponseEntity.ok(AuthResponse.builder().token(token).build());
     }
+    
+    // ResponseEntity.status(HttpStatus.CREATED).body()
 
     
     // Solo registra en usuarios -> admins
