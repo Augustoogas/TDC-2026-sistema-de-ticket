@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://ticketflowbackend.onrender.com/api/:path*"
+    }
+  ]
+}
