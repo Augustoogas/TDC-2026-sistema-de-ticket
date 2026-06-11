@@ -180,7 +180,10 @@ export const AdminService = {
 };
 
 // --- CONFIGURACIÓN BASE ---
-const API_BASE_URL = 'http://localhost:8081/api';
+// Usamos la variable de entorno de Vercel, si no existe usamos la URL directa de Render, y si estamos local usamos localhost
+const API_BASE_URL = import.meta.env.VITE_API_URL 
+    ? `${import.meta.env.VITE_API_URL}/api` 
+    : 'https://ticketflowbackend.onrender.com/api';
 
 // --- HELPER PARA AGREGAR TOKEN A LAS PETICIONES ---
 const getAuthHeaders = () => {
