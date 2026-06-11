@@ -52,8 +52,6 @@ export const EventService = {
     return { success: true };
   },
 
-  // Mantenemos estas funciones vacías o retornando arrays para que las pantallas 
-  // de salas y categorías del diseño de Augusto no tiren error al cargar.
   getSalas: async () => {
     const saved = localStorage.getItem('ticketflow_salas');
     return saved ? JSON.parse(saved) : [];
@@ -131,6 +129,34 @@ export const AuthService = {
   },
   getToken: () => localStorage.getItem('auth_token'),
   isAuthenticated: () => !!localStorage.getItem('auth_token'),
+};
+
+// 🟢 RESTAURADO PARA QUE VITE NO LOGRE FALLAR EL BUILD:
+export const AdminService = {
+  getUsers: async () => {
+    // Apunta a tu controlador de usuarios en Spring Boot
+    const response = await fetch(`${API_BASE_URL}/usuarios`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) return []; // Retorna vacío si falla para que no rompa la pantalla
+    return await response.json();
+  },
+  deleteUser: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/usuarios/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    return { success: response.ok };
+  },
+  saveUser: async (userForm) => {
+    const response = await fetch(`${API_BASE_URL}/usuarios`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(userForm),
+    });
+    return { success: response.ok };
+  },
 };
 
 export const PurchaseService = {
