@@ -56,6 +56,7 @@ public class SecurityConfig {
                .requestMatchers("/api/eventos/**").permitAll() 
                 .requestMatchers("/api/tickets/**").permitAll()
                 .requestMatchers("/api/register/**").permitAll()
+                .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
             		//.anyRequest().permitAll()
             )
