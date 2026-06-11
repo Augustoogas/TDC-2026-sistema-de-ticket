@@ -52,8 +52,8 @@ export const EventService = {
     return { success: true };
   },
 
-  // Mantenemos los simuladores locales solo para lo que NO está implementado en tu Java
-  // de modo que las pantallas de salas y categorías no tiren pantalla azul
+  // Mantenemos estas funciones vacías o retornando arrays para que las pantallas 
+  // de salas y categorías del diseño de Augusto no tiren error al cargar.
   getSalas: async () => {
     const saved = localStorage.getItem('ticketflow_salas');
     return saved ? JSON.parse(saved) : [];
@@ -84,10 +84,8 @@ export const AuthService = {
       if (!response.ok) throw new Error('Credenciales inválidas');
 
       const data = await response.json();
-      // Guardamos el token JWT que genera tu Spring Boot
       localStorage.setItem('auth_token', data.token);
       
-      // Como tu back no tiene "/auth/me", guardamos un perfil básico con el email
       const mockProfile = { email, nombre: email.split('@')[0], role: 'USER' };
       localStorage.setItem('user', JSON.stringify(mockProfile));
 
@@ -137,7 +135,6 @@ export const AuthService = {
 
 export const PurchaseService = {
   sendPurchase: async (purchaseData) => {
-    // Apunta directo a tu Controller de /api/reservas en Spring Boot
     const response = await fetch(`${API_BASE_URL}/reservas`, {
       method: 'POST',
       headers: getAuthHeaders(),
