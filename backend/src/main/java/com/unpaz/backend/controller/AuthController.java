@@ -28,7 +28,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Tag(name = "Autenticación", description = "Endpoints para registro, login y gestión de perfil")
 public class AuthController {
 
