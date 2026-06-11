@@ -59,8 +59,8 @@ docker compose build --no-cache
 
 ## Acceso
 
-- **Backend API**: http://localhost:8080
-- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **Backend API**: http://localhost:8081
+- **Swagger UI**: http://localhost:8081/swagger-ui.html
 - **PostgreSQL**: localhost:5432
 
 ## Estructura
