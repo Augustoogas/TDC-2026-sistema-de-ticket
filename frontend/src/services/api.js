@@ -39,6 +39,8 @@ export const EventService = {
     });
     if (!response.ok) throw new Error('Error al cargar los eventos');
     const data = await response.json();
+    //qué trae el back?
+      console.log("DATOS QUE TRAE getAllEvents:", data);
     return data.map(mapBackendEventToFrontend);
   },
 
@@ -124,6 +126,8 @@ export const AuthService = {
 
 
       const data = await response.json(); 
+      //qué trae el back?
+      console.log("DATOS QUE TRAE Authservice:", data);
       localStorage.setItem('auth_token', data.token);
       
  
@@ -207,6 +211,8 @@ export const AdminService = {
       headers: getAuthHeaders(),
     });
     if (!response.ok) return [];
+    //qué trae el back?
+      console.log("DATOS QUE TRAE getUsers:", response.json());
     return await response.json();
   },
   deleteUser: async (id) => {
