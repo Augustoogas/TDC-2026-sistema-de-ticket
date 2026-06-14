@@ -34,6 +34,12 @@ public class EventoServiceImp {
                 .toList();
     }
 
+    public EventoDto obtenerPorId(Long id){
+        Evento evento = eventoRepository.findById(id)
+        .orElseThrow(()-> new RuntimeException("Evento no encontrado"));
+        return eventoMapper.mapearDTO(evento);
+    }
+
     public List<EventoDto> buscarEventos(String q){
 
         return eventoRepository
