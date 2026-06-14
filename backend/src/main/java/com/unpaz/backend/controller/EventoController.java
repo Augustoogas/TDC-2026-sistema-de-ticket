@@ -43,8 +43,14 @@ public class EventoController {
 
 
     // obtener el evento concreto
-    @GetMapping("{id}")
-    public ResponseEntity<EventoDto> obtenerEvento(@PathVariable Long id){
+   @Operation(
+        summary = "Obtener evento por ID",
+        description = "Retorna los datos de un evento específico"
+    )
+    @ApiResponse(responseCode = "200", description = "Evento encontrado")
+    @ApiResponse(responseCode = "404", description = "Evento no encontrado")
+    @GetMapping("/{id}")
+    public ResponseEntity<EventoDto> obtenerEvento(@PathVariable Long id) {
         return ResponseEntity.ok(eventoService.obtenerPorId(id));
     }
 
