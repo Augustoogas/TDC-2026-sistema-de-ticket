@@ -21,7 +21,6 @@ const mapBackendEventToFrontend = (backendEvent) => {
     fecha: backendEvent.fecha,
     lugar: backendEvent.lugar || (backendEvent.locacion ? backendEvent.locacion.nombre : 'Estadio Único'),
     imagen: backendEvent.imagen || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500',
-    // Mapeos de compatibilidad para evitar que el front se rompa
     categoria: backendEvent.categoria || 'Música',
     sala: backendEvent.sala || 'Sala Principal',
     precioBase: backendEvent.precioBase || 1500
@@ -124,9 +123,9 @@ export const AuthService = {
       if (!response.ok) throw new Error('Credenciales inválidas');
 
 
-      const data = await response.json(); // Devuelve { token: "..." }
+      const data = await response.json(); 
       localStorage.setItem('auth_token', data.token);
-     
+      
  
       const profileResponse = await fetch(`${API_BASE_URL}/auth/me`, {
         method: 'GET',
@@ -137,12 +136,12 @@ export const AuthService = {
       });
 
 
-      let userProfile;
-      if (profileResponse.ok) {
-        userProfile = await profileResponse.json(); 
-      } else {
-        userProfile = { email, nombre: email.split('@')[0], role: 'CLIENTE' };
+      if (!profileResponse.ok) {
+        throw new Error('Error al obtener el perfil de usuario desde el servidor');
       }
+
+
+      const userProfile = await profileResponse.json(); 
 
 
       localStorage.setItem('user', JSON.stringify(userProfile));
@@ -181,7 +180,7 @@ export const AuthService = {
         apellido: registerData.apellido,
         role: 'CLIENTE'
       };
-     
+      
       localStorage.setItem('user', JSON.stringify(userProfile));
       return userProfile;
     } catch (error) {
@@ -247,7 +246,7 @@ export const PurchaseService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(reservaDTO),
     });
-   
+    
     if (!response.ok) throw new Error('Error al procesar la reserva en el servidor');
     return await response.json();
   },
