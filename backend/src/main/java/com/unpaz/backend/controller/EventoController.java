@@ -41,6 +41,20 @@ public class EventoController {
         return ResponseEntity.ok(eventoService.listarEventos());
     }
 
+
+    // obtener el evento concreto
+   @Operation(
+        summary = "Obtener evento por ID",
+        description = "Retorna los datos de un evento específico"
+    )
+    @ApiResponse(responseCode = "200", description = "Evento encontrado")
+    @ApiResponse(responseCode = "404", description = "Evento no encontrado")
+    @GetMapping("/{id}")
+    public ResponseEntity<EventoDto> obtenerEvento(@PathVariable Long id) {
+        return ResponseEntity.ok(eventoService.obtenerPorId(id));
+    }
+
+
     // busqueda de eventos
     @Operation(
         summary = "Buscar evento",
