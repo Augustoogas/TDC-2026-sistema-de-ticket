@@ -1,9 +1,9 @@
 // --- CONFIGURACIÓN BASE ---
-// const API_BASE_URL = import.meta.env.VITE_API_URL 
-//   ? `${import.meta.env.VITE_API_URL}/api` 
-//   : 'https://ticketflowbackend.onrender.com/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api` 
+  : 'https://ticketflowbackend.onrender.com/api';
 
-const API_BASE_URL = 'http://localhost:8081/api';
+
 
 // --- HELPER PARA AGREGAR TOKEN A LAS PETICIONES ---
 const getAuthHeaders = () => {
@@ -180,7 +180,11 @@ export const PurchaseService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(purchaseData),
     });
-    if (!response.ok) throw new Error('Error al procesar la reserva');
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al procesar la reserva');
+    }
     return await response.json();
   },
 };
