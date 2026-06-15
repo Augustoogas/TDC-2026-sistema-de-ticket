@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -5,14 +6,26 @@ import {
   Container,
   Typography,
   Button,
-  TextField,
-  Stack,
   CircularProgress,
   Alert,
+  TextField,
+  Stack,
   useTheme,
+  Paper,
 } from '@mui/material';
-import Seat from '../components/Seat';
 import { EventService } from '../services/api';
+
+const FILAS = [
+  { letra: 'A', nombre: 'VIP', color: '#f44336', precio: 15000, asientos: 10 },
+  { letra: 'B', nombre: 'Platea', color: '#2196f3', precio: 12000, asientos: 12 },
+  { letra: 'C', nombre: 'General', color: '#4caf50', precio: 8000, asientos: 14 },
+];
+
+const SECTORES = [
+  { nombre: 'VIP', color: '#f44336', precio: 15000, disponibles: 10, sectorId: 1 },
+  { nombre: 'Platea', color: '#2196f3', precio: 12000, disponibles: 12, sectorId: 2 },
+  { nombre: 'General', color: '#4caf50', precio: 8000, disponibles: 14, sectorId: 3 },
+];
 
 const EventDetail = () => {
   const { id } = useParams();
@@ -21,7 +34,7 @@ const EventDetail = () => {
 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [selectedSector, setSelectedSector] = useState(null);
   const [ticketCount, setTicketCount] = useState(1);
   const [user, setUser] = useState(null);
 
@@ -29,12 +42,13 @@ const EventDetail = () => {
     const fetchDetail = async () => {
       try {
         setLoading(true);
-
         const loggedUser = JSON.parse(localStorage.getItem('user'));
         setUser(loggedUser);
 
         const data = await EventService.getEventDetail(id);
         setEvent(data);
+      } catch (error) {
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -43,45 +57,40 @@ const EventDetail = () => {
     fetchDetail();
   }, [id]);
 
-  const handleSeatClick = (seatId) => {
-    if (user?.role === 'ADMIN') return;
-
-    if (selectedSeats.includes(seatId)) {
-      setSelectedSeats((prev) => prev.filter((s) => s !== seatId));
-    } else {
-      if (selectedSeats.length < ticketCount) {
-        setSelectedSeats((prev) => [...prev, seatId]);
-      }
+  // 
+  const handleSelectSector = (sector) => {
+    setSelectedSector(sector);
+    if (ticketCount > sector.disponibles) {
+      setTicketCount(sector.disponibles);
     }
   };
 
   const handleComprar = () => {
-    if (user?.role === 'ADMIN') return;
+    if (!selectedSector) return;
 
-    const total = selectedSeats.reduce((acc, seatId) => {
-      const fila = event.filas.find((f) => seatId.startsWith(f.letra));
-      return acc + (fila?.precio || 0);
-    }, 0);
+    const total = ticketCount * selectedSector.precio;
 
+    // Ajustado para enviar los datos limpios al Checkout anterior
+    console.log("¿Qué tiene adentro el sector seleccionado?:", selectedSector);
+
+    
+// navigate('/checkout', { ... })
     navigate('/checkout', {
       state: {
-        asientos: selectedSeats,
-        total,
-        evento: event.nombre,
+        eventoId: event.eventoId || event.id || id,
+        nombreEvento: event.titulo,
+        sectorId: selectedSector.id || selectedSector.idSector || selectedSector.sectorId,
+        nombreSector: selectedSector.nombre,
+        cantidadEntradas: ticketCount,
+      //   asientos: Array.from({ length: ticketCount }, (_, i) => `${selectedSector.nombre} - Ticket ${i + 1}`), // Simulación de asientos para tu Checkout anterior
+        montoTotal: total,
       },
     });
   };
 
   if (loading) {
     return (
-      <Box
-        sx={{
-          height: '80vh',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
+      <Box sx={{ height: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <CircularProgress />
       </Box>
     );
@@ -89,7 +98,7 @@ const EventDetail = () => {
 
   if (!event) {
     return (
-      <Typography sx={{ textAlign: 'center', mt: 10 }}>
+      <Typography sx={{ textAlign: 'center', mt: 10 }} variant="h6">
         Evento no encontrado
       </Typography>
     );
@@ -103,173 +112,149 @@ const EventDetail = () => {
         </Alert>
       )}
 
-      {/* HEADER */}
-      <Box
-        sx={{
-          mb: 6,
-          p: 4,
-          bgcolor: theme.palette.background.paper,
-          border: `1px solid ${theme.palette.custom.cardBorder}`,
-          borderRadius: '20px',
-        }}
-      >
-        <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>
-          {event.nombre}
+      {/* DATOS DEL EVENTO */}
+      <Box sx={{ mb: 6, p: 4, bgcolor: theme.palette.background.paper, borderRadius: '20px' }}>
+        <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
+          {event.titulo}
         </Typography>
 
-        <Typography
-          variant="body1"
-          sx={{ mb: 2, fontWeight: 600, color: theme.palette.primary.main }}
-        >
+        <Typography variant="body1" sx={{ mb: 2, color: theme.palette.primary.main, fontWeight: 500 }}>
           {event.fecha}
         </Typography>
 
-        <Typography
-          variant="body2"
-          sx={{ lineHeight: 1.7, color: theme.palette.text.secondary }}
-        >
+        <Typography variant="body2" sx={{ mb: 2 }}>
           {event.descripcion}
         </Typography>
 
-        {/* CONTROL */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
-          <Typography sx={{ fontWeight: 500 }}>Cantidad:</Typography>
+        <Typography sx={{ mt: 2, color: 'text.secondary' }}>
+          Locación: {event.locacionNombre}
+        </Typography>
 
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 3 }}>
+          <Typography>Cantidad de entradas:</Typography>
           <TextField
             type="number"
             size="small"
             value={ticketCount}
+            // 3. CORRECCIÓN: Controlar que no baje de 1 ni supere los disponibles del sector seleccionado
             onChange={(e) => {
-              setTicketCount(Math.max(1, Number(e.target.value)));
-              setSelectedSeats([]);
+              const val = Number(e.target.value);
+              const maxLimit = selectedSector ? selectedSector.disponibles : 99;
+              setTicketCount(Math.min(maxLimit, Math.max(1, val)));
             }}
-            sx={{ width: 90 }}
+            disabled={!selectedSector}
+            helperText={!selectedSector ? "Selecciona un sector primero" : `Asientos: ${selectedSector.disponibles}`}
+            sx={{ width: 120 }}
           />
         </Box>
       </Box>
 
       {/* ESCENARIO */}
       <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Typography variant="overline" sx={{ fontWeight: 600, letterSpacing: 4 }}>
-          ESCENARIO
-        </Typography>
+        <Box sx={{ width: '100%', bgcolor: '#323131', color: 'white', py: 1.5, borderRadius: 2 }}>
+          <Typography variant="subtitle1" sx={{ letterSpacing: 6, fontWeight: 'bold' }}>
+            ESCENARIO
+          </Typography>
+        </Box>
       </Box>
 
-      {/* ASIENTOS */}
-      <Box
-        sx={{
-          mb: 5,
-          display: 'flex',
-          justifyContent: 'center',
-          px: 1,
-        }}
-      >
-        <Stack spacing={2} sx={{ alignItems: 'center' }}>
-          {event.filas.map((fila) => (
-            <Box
-              key={fila.letra}
-              sx={{
-                display: 'flex',
-                gap: 1.5,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Typography
-                sx={{
-                  width: 30,
-                  color: theme.palette.text.secondary,
-                  fontWeight: 600,
-                  textAlign: 'center',
-                }}
-              >
+      {/* MAPA DE ASIENTOS */}
+      <Box sx={{ mb: 5, display: 'flex', justifyContent: 'center' }}>
+        <Stack spacing={1.5} sx={{ width: '100%', alignItems: 'center' }}>
+          {FILAS.map((fila) => (
+            <Box key={fila.letra} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="body2" sx={{ fontWeight: 'bold', width: 15 }}>
                 {fila.letra}
               </Typography>
-
-              {Array.from({ length: fila.asientos }).map((_, i) => {
-                const seatId = `${fila.letra}${i + 1}`;
-
-                return (
-                  <Seat
-                    key={seatId}
-                    id={seatId}
-                    customColor={fila.color}
-                    status={
-                      selectedSeats.includes(seatId) ? 'selected' : 'available'
-                    }
-                    onToggle={handleSeatClick}
-                  />
-                );
-              })}
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                {Array.from({ length: fila.asientos }).map((_, index) => {
+                  const esSeleccionado = selectedSector?.nombre === fila.nombre;
+                  return (
+                    <Box
+                      key={index}
+                      onClick={() => {
+                        const sectorAsociado = SECTORES.find(s => s.nombre === fila.nombre);
+                        if (sectorAsociado) handleSelectSector(sectorAsociado);
+                      }}
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        bgcolor: fila.color,
+                        borderRadius: 0.5,
+                        cursor: 'pointer',
+                        opacity: esSeleccionado ? 1 : 0.4, // Se bajó un poco la opacidad default para notar más la selección
+                        transform: esSeleccionado ? 'scale(1.15)' : 'none',
+                        transition: 'all 0.2s',
+                        border: esSeleccionado ? '2px solid #fff' : 'none',
+                        boxShadow: esSeleccionado ? 3 : 0,
+                        '&:hover': { opacity: 1, transform: 'scale(1.1)' }
+                      }}
+                      title={`${fila.nombre} - Sector Fila ${fila.letra}`}
+                    />
+                  );
+                })}
+              </Box>
             </Box>
           ))}
         </Stack>
       </Box>
 
-      {/* LEYENDA */}
-      <Box
-        sx={{
-          mt: 5,
-          mb: 6,
-          display: 'flex',
-          gap: 4,
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-        }}
-      >
-        {event.filas.map((fila) => (
-          <Box
-            key={fila.letra}
-            sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}
-          >
-            <Box
+      {/* SECTORES CARD */}
+      <Box sx={{ mb: 5, display: 'flex', justifyContent: 'center', gap: 3, flexWrap: 'wrap' }}>
+        {SECTORES.map((sector) => {
+          const esSeleccionado = selectedSector?.nombre === sector.nombre;
+          return (
+            <Paper
+              key={sector.nombre}
+              onClick={() => handleSelectSector(sector)}
+              elevation={esSeleccionado ? 6 : 1}
               sx={{
-                width: 14,
-                height: 14,
-                bgcolor: fila.color,
-                borderRadius: 0.5,
+                p: 2.5,
+                width: 160,
+                textAlign: 'center',
+                cursor: 'pointer',
+                bgcolor: sector.color,
+                color: 'white',
+                borderRadius: 3,
+                transition: 'transform 0.2s',
+                border: esSeleccionado ? '3px solid #fff' : '3px solid transparent',
+                transform: esSeleccionado ? 'scale(1.05)' : 'none',
               }}
-            />
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              {fila.nombre} <strong>${fila.precio}</strong>
+            >
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>{sector.nombre}</Typography>
+              <Typography variant="body1">${sector.precio}</Typography>
+              <Typography variant="caption" sx={{ opacity: 0.9 }}>{sector.disponibles} disponibles</Typography>
+            </Paper>
+          );
+        })}
+      </Box>
+
+      {/* LEYENDA */}
+      <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', mb: 5 }}>
+        {FILAS.map((fila) => (
+          <Box key={fila.letra} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ width: 14, height: 14, bgcolor: fila.color, borderRadius: 0.5 }} />
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              {fila.nombre} - ${fila.precio}
             </Typography>
           </Box>
         ))}
       </Box>
 
-      {/* ACTIONS */}
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 2,
-          justifyContent: 'center',
-          mb: 4,
-        }}
-      >
-        <Button
-          variant="outlined"
-          onClick={() => navigate('/')}
-          sx={{
-            minWidth: 140,
-            color: theme.palette.text.primary,
-            px: 4,
-            '&:hover': {
-              bgcolor: theme.palette.background.default,
-              color: theme.palette.primary.main,
-            },
-          }}
-        >
+      {/* BOTONES */}
+      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+        <Button variant="outlined" onClick={() => navigate('/')}>
           Volver
         </Button>
 
         {user?.role !== 'ADMIN' && (
           <Button
             variant="contained"
-            disabled={selectedSeats.length === 0}
+            disabled={!selectedSector}
             onClick={handleComprar}
-            sx={{ minWidth: 140 }}
+            size="large"
           >
-            Comprar ({selectedSeats.length})
+            Comprar ({selectedSector ? ticketCount : 0})
           </Button>
         )}
       </Box>

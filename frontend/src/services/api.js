@@ -3,6 +3,9 @@ const API_BASE_URL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api` 
   : 'https://ticketflowbackend.onrender.com/api';
 
+
+// const API_BASE_URL = 'http://localhost:8081/api';
+
 // --- HELPER PARA AGREGAR TOKEN A LAS PETICIONES ---
 const getAuthHeaders = () => {
   const token = localStorage.getItem('auth_token');
@@ -62,10 +65,10 @@ export const EventService = {
   },
   getEventoCategorias: async () => {
     return [
-      { id: 'EC1', nombre: 'Música', icon: '🎵' },
-      { id: 'EC2', nombre: 'Teatro', icon: '🎭' },
-      { id: 'EC3', nombre: 'Danza', icon: '💃' },
-      { id: 'EC4', nombre: 'Cine', icon: '🎬' },
+     { id: 'EC1', titulo: 'Música', icon: '🎵' },
+      { id: 'EC2', titulo: 'Teatro', icon: '🎭' },
+      { id: 'EC3', titulo: 'Danza', icon: '💃' },
+      { id: 'EC4', titulo: 'Cine', icon: '🎬' },
     ];
   },
 };
@@ -84,10 +87,20 @@ export const AuthService = {
       const data = await response.json();
       localStorage.setItem('auth_token', data.token);
       
-      const mockProfile = { email, nombre: email.split('@')[0], role: 'USER' };
-      localStorage.setItem('user', JSON.stringify(mockProfile));
+      const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+      });
 
-      return mockProfile;
+      if (!meResponse.ok) {
+      throw new Error('Error al obtener el perfil del servidor');
+    }
+
+      const user = await meResponse.json();
+      localStorage.setItem('user', JSON.stringify(user));
+
+      return user;
     } catch (error) {
       console.error('Login error:', error.message);
       throw error;
@@ -108,14 +121,16 @@ export const AuthService = {
       });
 
       if (!response.ok) throw new Error('Error en el registro');
-
       const data = await response.json();
       localStorage.setItem('auth_token', data.token);
 
-      const mockProfile = { email: registerData.email, nombre: registerData.nombre, role: 'USER' };
-      localStorage.setItem('user', JSON.stringify(mockProfile));
 
-      return mockProfile;
+      const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${data.token}` },
+      });
+      const user = await meResponse.json();
+      localStorage.setItem('user', JSON.stringify(user));
+      return user;
     } catch (error) {
       console.error('Register error:', error.message);
       throw error;
@@ -135,7 +150,7 @@ export const AuthService = {
 export const AdminService = {
   getUsers: async () => {
     // Apunta a tu controlador de usuarios en Spring Boot
-    const response = await fetch(`${API_BASE_URL}/usuarios`, {
+    const response = await fetch(`${API_BASE_URL}/admin`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -160,13 +175,17 @@ export const AdminService = {
 };
 
 export const PurchaseService = {
-  sendPurchase: async (purchaseData) => {
-    const response = await fetch(`${API_BASE_URL}/reservas`, {
+  sendPurchase: async (purchaseData, clienteId) => {
+    const response = await fetch(`${API_BASE_URL}/reservas/${clienteId}`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(purchaseData),
     });
-    if (!response.ok) throw new Error('Error al procesar la reserva');
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al procesar la reserva');
+    }
     return await response.json();
   },
 };
