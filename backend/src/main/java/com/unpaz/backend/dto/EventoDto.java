@@ -30,4 +30,10 @@ public class EventoDto {
 
     @Schema(description = "Nombre de la locacion del evento", example = "Centro Cultural UNPAZ")
     private String locacionNombre;
+
+    @Schema(description = "URL de la imagen asociada al Evento", example = "https://www.pexels.com/es-es/foto/jugando-musica-piano-instrumento-musical-16035577/")
+    private String imagen;
+
+    @Schema(description = "Fecha y hora del evento", example = "2026-11-15T21:00:00")
+    private String fecha;
 }

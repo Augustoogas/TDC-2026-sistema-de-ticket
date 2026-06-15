@@ -15,6 +15,9 @@ public class Evento {
     private String tipo;
     private String descripcion;
 
+    private String imagen;
+    private String fecha;
+
     @ManyToOne
     @JoinColumn(name = "admin_id") 
     private Admin creador;
