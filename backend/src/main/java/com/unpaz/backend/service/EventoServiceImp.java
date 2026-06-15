@@ -73,6 +73,5 @@ public class EventoServiceImp {
         Evento eventoGuardado = eventoRepository.save(evento);
 
         return eventoMapper.mapearDTO(eventoGuardado);
-
     }
 }
