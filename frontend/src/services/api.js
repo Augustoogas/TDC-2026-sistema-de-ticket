@@ -1,4 +1,4 @@
-// --- CONFIGURACIÓN BASE ---
+ // --- CONFIGURACIÓN BASE ---
 const API_BASE_URL = import.meta.env.VITE_API_URL 
   ? `${import.meta.env.VITE_API_URL}/api` 
   : 'https://ticketflowbackend.onrender.com/api';
@@ -93,20 +93,12 @@ export const EventService = {
     const saved = localStorage.getItem('ticketflow_salas');
     return saved ? JSON.parse(saved) : [{ id: 'S1', nombre: 'Sala Principal' }, { id: 'S2', nombre: 'Microestadio' }];
   },
-  getCategorias: async () => {
-    return [
-      { id: 'EC1', nombre: 'Música', icon: '🎵' },
-      { id: 'EC2', nombre: 'Teatro', icon: '🎭' },
-      { id: 'EC3', nombre: 'Danza', icon: '💃' },
-      { id: 'EC4', nombre: 'Cine', icon: '🎬' },
-    ];
-  },
   getEventoCategorias: async () => {
     return [
-      { id: 'EC1', nombre: 'Música', icon: '🎵' },
-      { id: 'EC2', nombre: 'Teatro', icon: '🎭' },
-      { id: 'EC3', nombre: 'Danza', icon: '💃' },
-      { id: 'EC4', nombre: 'Cine', icon: '🎬' },
+     { id: 'EC1', titulo: 'Música', icon: '🎵' },
+      { id: 'EC2', titulo: 'Teatro', icon: '🎭' },
+      { id: 'EC3', titulo: 'Danza', icon: '💃' },
+      { id: 'EC4', titulo: 'Cine', icon: '🎬' },
     ];
   },
 };
@@ -139,15 +131,11 @@ export const AuthService = {
         }
       });
 
-
       if (!profileResponse.ok) {
         throw new Error('Error al obtener el perfil de usuario desde el servidor');
       }
 
-
       const userProfile = await profileResponse.json(); 
-
-
       localStorage.setItem('user', JSON.stringify(userProfile));
       return userProfile;
     } catch (error) {
@@ -172,21 +160,23 @@ export const AuthService = {
 
 
       if (!response.ok) throw new Error('Error en el registro');
-
-
+      
       const data = await response.json();
       localStorage.setItem('auth_token', data.token);
 
 
-      const userProfile = {
-        email: registerData.email,
-        nombre: registerData.nombre,
-        apellido: registerData.apellido,
-        role: 'CLIENTE'
-      };
+      const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${data.token}` },
+      });
       
-      localStorage.setItem('user', JSON.stringify(userProfile));
-      return userProfile;
+      if (!meResponse.ok) {
+        throw new Error('Error al verificar perfil tras registro');
+      }
+
+      const user = await meResponse.json();
+      localStorage.setItem('user', JSON.stringify(user));
+      return user; 
     } catch (error) {
       console.error('Register error:', error.message);
       throw error;

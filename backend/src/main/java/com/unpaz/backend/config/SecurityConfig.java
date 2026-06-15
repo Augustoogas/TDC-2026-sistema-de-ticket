@@ -50,7 +50,6 @@ public class SecurityConfig {
                .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/swagger-ui.html").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/api/auth/me").permitAll()
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers("/api/auth/register").permitAll()   
                .requestMatchers("/api/eventos/**").permitAll() 

@@ -34,7 +34,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
       SPRING_SQL_INIT_DATA_LOCATIONS: classpath:import.sql
-      SPRING_SQL_INIT_MODE: always
+      SPRING_SQL_INIT_MODE: ${SPRING_SQL_INIT_MODE:-always}
       SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION: 'true'
     ports:
       - '8080:8081'
