@@ -194,23 +194,20 @@ export const PurchaseService = {
   },
 
 
-  // nuevo metodo para cambiar el estaod de la reserva en la bbdd
+  // nuevo metodo para cambiar el estado de la reserva en la bbdd
 
 
   confirmReservation: async (reservaId) => {
     const response = await fetch(
-      `${API_BASE_URL}/reservas/${reservaId}/confirmar`,
-      {
+      `${API_BASE_URL}/reservas/${reservaId}/confirmar`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
-      }
-    );
+      });
 
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(errorText || 'Error al confirmar la reserva');
     }
-
     return await response.json();
   },
 
