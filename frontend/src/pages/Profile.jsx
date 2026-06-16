@@ -139,7 +139,7 @@ const Profile = () => {
                 color: theme.palette.text.primary,
               }}
             >
-              {user?.role}
+              {user?.role === 'ADMIN' ? 'Administrador' : 'Cliente'}
             </Typography>
           </Box>
         </Stack>

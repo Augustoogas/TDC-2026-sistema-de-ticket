@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import formatearFechaEvento from '../utils/dateUtils';
 import heroImage from '../assets/images/hero.jpg';
 
 import {
@@ -215,7 +216,9 @@ const Home = () => {
                         mt: 'auto',
                       }}
                     >
-                      {evento.fecha}
+                      {evento.fecha
+                        ? formatearFechaEvento(evento.fecha)
+                        : 'Fecha no definida'}
                     </Typography>
                   </CardContent>
                 </CardActionArea>

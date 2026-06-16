@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import formatearFechaEvento from '../utils/dateUtils';
 
 import {
   Container,
@@ -144,7 +145,7 @@ const Events = () => {
           }}
         >
           {eventosFiltrados.map((evento) => {
-            const categoria = obtenerCategoria(evento.tipo);
+            const categoria = obtenerCategoria(evento.categoriaId);
             return (
               <Card
                 key={evento.eventoId}
@@ -200,7 +201,7 @@ const Events = () => {
                           fontWeight: 600,
                         }}
                       >
-                        {categoria.icon} {categoria.nombre}
+                        {categoria.icon} {categoria.titulo}
                       </Box>
                     )}
                   </Box>
@@ -233,16 +234,12 @@ const Events = () => {
                         color: theme.palette.text.secondary,
                         lineHeight: 1.3,
                         mb: 0.5,
-                        fontWeight: 500
+                        fontWeight: 500,
                       }}
                     >
-                      {evento.fecha ? new Date(evento.fecha).toLocaleDateString('es-AR', {
-                        day: '2-digit',
-                        month: 'long',
-                        year: 'numeric'
-                      }) : (evento.fechaString || 'fecha no definida')
-
-                      }
+                      {evento.fecha
+                        ? formatearFechaEvento(evento.fecha)
+                        : 'Fecha no definida'}
                     </Typography>
                   </CardContent>
                 </CardActionArea>
