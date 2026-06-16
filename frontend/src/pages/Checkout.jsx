@@ -71,12 +71,15 @@ const Checkout = () => {
     console.log("Reserva a enviar:", reservaBody);
 
     try {
-      const response = await PurchaseService.sendPurchase(reservaBody, clienteId);
+      const reserva = await PurchaseService.sendPurchase(reservaBody,clienteId);
 
-      if (response && response.reservaId) {
-        alert(`¡Reserva confirmada! ID de Orden: ${response.reservaId}`);
-        navigate('/');
-      }
+      console.log("Reserva creada:", reserva);
+      console.log(JSON.stringify(reserva, null, 2));
+
+      await PurchaseService.confirmReservation(reserva.reservaId);
+
+      alert(`¡Reserva confirmada! ID de Orden: ${reserva.reservaId}`);
+      navigate('/');
     } catch (error) {
       console.error(error);
       alert(`Error al procesar el pago: ${error.message}`);

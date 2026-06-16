@@ -103,6 +103,7 @@ public class AuthController {
                 .apellido(usuarioLogueado.getApellido())
                 .email(usuarioLogueado.getEmail())
                 .role(usuarioLogueado.getRole())
+                .id(usuarioLogueado.getUsuarioId())
                 .build();
 
         return ResponseEntity.ok(perfil);

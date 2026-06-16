@@ -11,6 +11,9 @@ import lombok.*;
 @Schema(description = "Datos del perfil del usuario autenticado")
 public class UserProfileDto {
 
+    @Schema(description = "ID del usuario", example = "1")
+    private Long id;
+
     @Schema(description = "Nombre del usuario", example = "Dani")
     private String nombre;
 

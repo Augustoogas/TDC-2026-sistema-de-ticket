@@ -3,7 +3,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api` 
   : 'https://ticketflowbackend.onrender.com/api';
 
-
+  
 // const API_BASE_URL = 'http://localhost:8081/api';
 
 // --- HELPER PARA AGREGAR TOKEN A LAS PETICIONES ---
@@ -15,7 +15,7 @@ const getAuthHeaders = () => {
   };
 };
 
-// --- SERVICIOS CONECTADOS AL BACKEND REAL (RENDER) ---
+// --- SERVICIOS CONECTADOS AL BACKEND REAL ---
 
 export const EventService = {
   getAllEvents: async () => {
@@ -63,12 +63,15 @@ export const EventService = {
     const saved = localStorage.getItem('ticketflow_categorias');
     return saved ? JSON.parse(saved) : [];
   },
+
+  // 🟢 CORREGIDO: Los IDs coinciden con las strings que el DTO maneja en el campo 'tipo'
   getEventoCategorias: async () => {
     return [
-     { id: 'EC1', titulo: 'Música', icon: '🎵' },
-      { id: 'EC2', titulo: 'Teatro', icon: '🎭' },
-      { id: 'EC3', titulo: 'Danza', icon: '💃' },
-      { id: 'EC4', titulo: 'Cine', icon: '🎬' },
+      { id: 'Música', titulo: 'Música', icon: '🎵' },
+      { id: 'Teatro', titulo: 'Teatro', icon: '🎭' },
+      { id: 'Danza', titulo: 'Danza', icon: '💃' },
+      { id: 'Cine', titulo: 'Cine', icon: '🎬' },
+      { id: 'Conferencia', titulo: 'Conferencia', icon: '🎤' }
     ];
   },
 };
@@ -88,14 +91,10 @@ export const AuthService = {
       localStorage.setItem('auth_token', data.token);
       
       const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${data.token}`,
-        },
+        headers: getAuthHeaders(), // Usamos el helper para heredar Content-Type y Bearer Token uniformemente
       });
 
-      if (!meResponse.ok) {
-      throw new Error('Error al obtener el perfil del servidor');
-    }
+      if (!meResponse.ok) throw new Error('Error al obtener el perfil del servidor');
 
       const user = await meResponse.json();
       localStorage.setItem('user', JSON.stringify(user));
@@ -124,10 +123,13 @@ export const AuthService = {
       const data = await response.json();
       localStorage.setItem('auth_token', data.token);
 
-
       const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${data.token}` },
+        headers: getAuthHeaders(),
       });
+
+      // 🟢 CORREGIDO: Validación estricta añadida para evitar romper el LocalStorage en el registro
+      if (!meResponse.ok) throw new Error('Error al obtener el perfil tras el registro');
+
       const user = await meResponse.json();
       localStorage.setItem('user', JSON.stringify(user));
       return user;
@@ -137,7 +139,10 @@ export const AuthService = {
     }
   },
 
-  getUser: () => JSON.parse(localStorage.getItem('user')),
+  getUser: () => {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  },
   logout: () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
@@ -146,15 +151,14 @@ export const AuthService = {
   isAuthenticated: () => !!localStorage.getItem('auth_token'),
 };
 
-// 🟢 RESTAURADO PARA QUE VITE NO LOGRE FALLAR EL BUILD:
 export const AdminService = {
   getUsers: async () => {
-    // Apunta a tu controlador de usuarios en Spring Boot
-    const response = await fetch(`${API_BASE_URL}/admin`, {
+    // 🟢 CORREGIDO: Apunta de forma coherente a /usuarios en sintonía con las rutas de abajo
+    const response = await fetch(`${API_BASE_URL}/usuarios`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
-    if (!response.ok) return []; // Retorna vacío si falla para que no rompa la pantalla
+    if (!response.ok) return []; 
     return await response.json();
   },
   deleteUser: async (id) => {
@@ -188,4 +192,26 @@ export const PurchaseService = {
     }
     return await response.json();
   },
+
+
+  // nuevo metodo para cambiar el estaod de la reserva en la bbdd
+
+
+  confirmReservation: async (reservaId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/reservas/${reservaId}/confirmar`,
+      {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al confirmar la reserva');
+    }
+
+    return await response.json();
+  },
+
 };
