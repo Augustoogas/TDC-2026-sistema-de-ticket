@@ -54,7 +54,7 @@ const Events = () => {
       ?.toLowerCase()
       .includes(searchTerm.toLowerCase());
     const cumpleCategoria =
-      selectedCategoria === null || evento.categoriaId === selectedCategoria;
+      selectedCategoria === null || evento.tipo === selectedCategoria;
     return cumpleBusqueda && cumpleCategoria;
   });
 
