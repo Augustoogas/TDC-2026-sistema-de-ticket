@@ -1,9 +1,8 @@
 // --- CONFIGURACIÓN BASE ---
-const API_BASE_URL = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL}/api` 
+const API_BASE_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
   : 'https://ticketflowbackend.onrender.com/api';
 
-  
 // const API_BASE_URL = 'http://localhost:8081/api';
 
 // --- HELPER PARA AGREGAR TOKEN A LAS PETICIONES ---
@@ -37,16 +36,15 @@ export const EventService = {
   },
 
   saveEvent: async (eventData) => {
-
     // para la creacion correcta de eventos
 
-    const payload = {
-      titulo: eventData.titulo,
-      tipo: eventData.tipo,
-      descripcion: eventData.descripcion,
-      fecha: eventData.fecha,
-      locacionId: eventData.locacionId,
-    };
+    // const payload = {
+    //   titulo: eventData.titulo,
+    //   tipo: eventData.tipo,
+    //   descripcion: eventData.descripcion,
+    //   fecha: eventData.fecha,
+    //   locacionId: eventData.locacionId,
+    // };
 
     const response = await fetch(`${API_BASE_URL}/eventos`, {
       method: 'POST',
@@ -77,14 +75,13 @@ export const EventService = {
     return saved ? JSON.parse(saved) : [];
   },
 
-  // 🟢 CORREGIDO: Los IDs coinciden con las strings que el DTO maneja en el campo 'tipo'
   getEventoCategorias: async () => {
     return [
-      { id: 'Música', titulo: 'Música', icon: '🎵' },
-      { id: 'Teatro', titulo: 'Teatro', icon: '🎭' },
-      { id: 'Danza', titulo: 'Danza', icon: '💃' },
-      { id: 'Cine', titulo: 'Cine', icon: '🎬' },
-      { id: 'Conferencia', titulo: 'Conferencia', icon: '🎤' }
+      { id: 1, titulo: 'Música', icon: '🎵' },
+      { id: 2, titulo: 'Teatro', icon: '🎭' },
+      { id: 3, titulo: 'Danza', icon: '💃' },
+      { id: 4, titulo: 'Cine', icon: '🎬' },
+      { id: 5, titulo: 'Conferencia', icon: '🎤' },
     ];
   },
 };
@@ -102,7 +99,7 @@ export const AuthService = {
 
       const data = await response.json();
       localStorage.setItem('auth_token', data.token);
-      
+
       const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: getAuthHeaders(), // Usamos el helper para heredar Content-Type y Bearer Token uniformemente
       });
@@ -141,7 +138,8 @@ export const AuthService = {
       });
 
       // 🟢 CORREGIDO: Validación estricta añadida para evitar romper el LocalStorage en el registro
-      if (!meResponse.ok) throw new Error('Error al obtener el perfil tras el registro');
+      if (!meResponse.ok)
+        throw new Error('Error al obtener el perfil tras el registro');
 
       const user = await meResponse.json();
       localStorage.setItem('user', JSON.stringify(user));
@@ -171,7 +169,7 @@ export const AdminService = {
       method: 'GET',
       headers: getAuthHeaders(),
     });
-    if (!response.ok) return []; 
+    if (!response.ok) return [];
     return await response.json();
   },
   deleteUser: async (id) => {
@@ -206,15 +204,13 @@ export const PurchaseService = {
     return await response.json();
   },
 
-
   // nuevo metodo para cambiar el estado de la reserva en la bbdd
-  
+
   confirmReservation: async (reservaId) => {
-    const response = await fetch(
-      `${API_BASE_URL}/reservas/${reservaId}/confirmar`, {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-      });
+    const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}/confirmar`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -225,12 +221,11 @@ export const PurchaseService = {
 
   // llamada a cancelar la reserva cuando se aprieta en el checkout el boton de cancelar y volver
 
-    cancelReservation: async (reservaId) => {
-    const response = await fetch(
-      `${API_BASE_URL}/reservas/${reservaId}/cancelar`, {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-      });
+  cancelReservation: async (reservaId) => {
+    const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}/cancelar`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       throw new Error('Error al cancelar reserva');
     }

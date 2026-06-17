@@ -19,6 +19,7 @@ public class EventoMapper {
         dto.setDescripcion(evento.getDescripcion());
         dto.setFecha(evento.getFecha());
         dto.setImagen(evento.getImagen());
+        dto.setCategoriaId(evento.getCategoriaId());
 
         if(evento.getCreador() != null){
             dto.setCreadorId(evento.getCreador().getUsuarioId());
