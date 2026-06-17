@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import formatearFechaEvento from '../utils/dateUtils';
 import heroImage from '../assets/images/hero.jpg';
 
 import {
@@ -160,7 +161,7 @@ const Home = () => {
           >
             {eventosDestacados.map((evento, index) => (
               <Card
-                key={evento.id_evento}
+                key={evento.eventoId}
                 sx={{
                   minWidth: 260,
                   maxWidth: 260,
@@ -169,7 +170,7 @@ const Home = () => {
                 }}
               >
                 <CardActionArea
-                  onClick={() => navigate(`/event/${evento.id_evento}`)}
+                  onClick={() => navigate(`/event/${evento.eventoId}`)}
                 >
                   <Box sx={{ position: 'relative', pt: '56.25%' }}>
                     <CardMedia
@@ -178,7 +179,7 @@ const Home = () => {
                         evento.imagen ||
                         'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=500'
                       }
-                      alt={evento.nombre}
+                      alt={evento.titulo}
                       sx={{
                         position: 'absolute',
                         inset: 0,
@@ -204,7 +205,7 @@ const Home = () => {
                       variant="h6"
                       sx={{ fontWeight: 500, mb: 0.5, lineHeight: 1.3 }}
                     >
-                      {evento.nombre}
+                      {evento.titulo}
                     </Typography>
 
                     <Typography
@@ -215,7 +216,9 @@ const Home = () => {
                         mt: 'auto',
                       }}
                     >
-                      {evento.fecha}
+                      {evento.fecha
+                        ? formatearFechaEvento(evento.fecha)
+                        : 'Fecha no definida'}
                     </Typography>
                   </CardContent>
                 </CardActionArea>

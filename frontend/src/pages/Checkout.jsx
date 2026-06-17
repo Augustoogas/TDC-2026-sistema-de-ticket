@@ -19,64 +19,75 @@ import { PurchaseService } from '../services/api';
 const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  console.log("State recibido:", location.state);
+  
   const [loading, setLoading] = useState(false);
 
-  const { asientos, total, evento } = location.state || {
-    asientos: [],
-    total: 0,
-    evento: 'Evento no seleccionado',
+  // 1. CORREGIDO: Extraemos las variables exactas del estado (arreglado typo cantidadEntradas)
+  const { nombreEvento, eventoId, sectorId, nombreSector, cantidadEntradas, montoTotal } = location.state || {
+    nombreEvento: 'Evento no seleccionado',
+    eventoId: null,
+    sectorId: null,
+    nombreSector: 'No seleccionado',
+    cantidadEntradas: 0,
+    montoTotal: 0,
   };
 
   const handlePayment = async (e) => {
     e.preventDefault();
 
-    if (total === 0) return;
+    if (!montoTotal || montoTotal === 0) return;
 
     setLoading(true);
 
-    const orderData = {
-      user_id: JSON.parse(localStorage.getItem('user'))?.id || 'ANONYMOUS',
-      event_name: evento,
-      selected_seats: asientos,
-      total_amount: total,
-      timestamp: new Date().toISOString(),
-    };
+    const user = JSON.parse(localStorage.getItem('user'));
+    const clienteId = user?.id;
 
-    try {
-      const response = await PurchaseService.sendPurchase(orderData);
-
-      if (response.success) {
-        alert(`Orden: ${response.orderId}`);
-        navigate('/');
-      }
-    } catch (error) {
-      console.error(error);
-      alert('Error al procesar el pago');
-    } finally {
+    if (!clienteId) {
+      alert('Debes iniciar sesión para completar la reserva.');
       setLoading(false);
+      return;
     }
-  };
+
+    const { reservaId } = location.state || {};
+
+    if (!reservaId) {
+      alert('No hay reserva para confirmar');
+      setLoading(false);
+      return;
+    }
+
+  try {
+    const reservaConfirmada =
+      await PurchaseService.confirmReservation(reservaId);
+
+    console.log("Reserva confirmada:", reservaConfirmada);
+
+    alert(`¡Reserva confirmada! ID: ${reservaConfirmada.reservaId}`);
+
+    navigate('/');
+
+  } catch (error) {
+    console.error(error);
+    alert(`Error al procesar el pago: ${error.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Container maxWidth="sm" sx={{ py: 10 }}>
-      {/* CARD PRINCIPAL */}
       <Paper
         elevation={0}
         sx={(theme) => ({
           p: 4,
           borderRadius: 3,
           backgroundColor: theme.palette.background.paper,
-          border: `1px solid ${theme.palette.custom.cardBorder}`,
+          border: `1px solid ${theme.palette.custom?.cardBorder || theme.palette.divider}`,
         })}
       >
-        {/* HEADER */}
-        <Typography
-          variant="h4"
-          sx={{
-            fontWeight: 800,
-            mb: 1,
-          }}
-        >
+        <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
           Finalizar compra
         </Typography>
 
@@ -86,7 +97,7 @@ const Checkout = () => {
 
         <Divider sx={{ mb: 3 }} />
 
-        {/* RESUMEN */}
+        {/* 3. RESUMEN CORREGIDO: Ya no usa 'evento', 'asientos' ni 'total' */}
         <Box
           sx={(theme) => ({
             mb: 4,
@@ -96,19 +107,16 @@ const Checkout = () => {
             border: `1px solid ${theme.palette.divider}`,
           })}
         >
-          <Typography
-            variant="overline"
-            sx={{ color: 'primary.main', fontWeight: 600 }}
-          >
+          <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 600 }}>
             RESUMEN
           </Typography>
 
           <Typography variant="h6" sx={{ mt: 1, fontWeight: 700 }}>
-            {evento}
+            {nombreEvento}
           </Typography>
 
           <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>
-            Asientos: {asientos.length ? asientos.join(', ') : 'Ninguno'}
+            Sector: <strong>{nombreSector}</strong> — {cantidadEntradas} {cantidadEntradas === 1 ? 'entrada' : 'entradas'}
           </Typography>
 
           <Typography
@@ -119,30 +127,17 @@ const Checkout = () => {
               color: theme.palette.primary.main,
             })}
           >
-            Total: ${total}
+            Total: ${montoTotal}
           </Typography>
         </Box>
 
-        {/* FORM */}
         <form onSubmit={handlePayment}>
-          <Typography
-            variant="h6"
-            sx={{
-              mb: 2,
-              fontWeight: 700,
-            }}
-          >
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
             Datos de pago
           </Typography>
 
           <Stack spacing={2.2}>
-            <TextField
-              label="Nombre en la tarjeta"
-              fullWidth
-              required
-              variant="outlined"
-            />
-
+            <TextField label="Nombre en la tarjeta" fullWidth required variant="outlined" />
             <TextField
               label="Número de tarjeta"
               fullWidth
@@ -152,16 +147,10 @@ const Checkout = () => {
             />
 
             <Grid container spacing={2}>
-              <Grid xs={6}>
-                <TextField
-                  label="Vencimiento"
-                  fullWidth
-                  required
-                  variant="outlined"
-                />
+              <Grid item xs={6}>
+                <TextField label="Vencimiento" fullWidth required variant="outlined" />
               </Grid>
-
-              <Grid xs={6}>
+              <Grid item xs={6}>
                 <TextField
                   label="CVV"
                   type="password"
@@ -173,13 +162,12 @@ const Checkout = () => {
               </Grid>
             </Grid>
 
-            {/* ACTIONS */}
             <Box sx={{ mt: 2 }}>
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
-                disabled={loading || total === 0}
+                disabled={loading || montoTotal === 0}
                 sx={{
                   py: 1.6,
                   fontWeight: 800,
@@ -188,13 +176,26 @@ const Checkout = () => {
                 {loading ? (
                   <CircularProgress size={22} color="inherit" />
                 ) : (
-                  `Pagar $${total}`
+                  `Pagar $${montoTotal}`
                 )}
               </Button>
 
               <Button
                 fullWidth
-                onClick={() => navigate(-1)}
+                onClick={ async () => {
+                    try {
+                      const { reservaId } = location.state || {};
+
+                      if (reservaId) {
+                        await PurchaseService.cancelReservation(reservaId);
+                      }
+
+                      navigate(-1);
+                    } catch (error) {
+                      console.error(error);
+                      alert("Error al cancelar la reserva");
+                    }
+                  }}
                 sx={{
                   mt: 1,
                   textTransform: 'none',

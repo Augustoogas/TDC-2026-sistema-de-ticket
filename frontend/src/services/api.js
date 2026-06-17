@@ -1,7 +1,9 @@
 // --- CONFIGURACIÓN BASE ---
-const API_BASE_URL = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL}/api` 
+const API_BASE_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
   : 'https://ticketflowbackend.onrender.com/api';
+
+// const API_BASE_URL = 'http://localhost:8081/api';
 
 // --- HELPER PARA AGREGAR TOKEN A LAS PETICIONES ---
 const getAuthHeaders = () => {
@@ -12,7 +14,7 @@ const getAuthHeaders = () => {
   };
 };
 
-// --- SERVICIOS CONECTADOS AL BACKEND REAL (RENDER) ---
+// --- SERVICIOS CONECTADOS AL BACKEND REAL ---
 
 export const EventService = {
   getAllEvents: async () => {
@@ -34,6 +36,16 @@ export const EventService = {
   },
 
   saveEvent: async (eventData) => {
+    // para la creacion correcta de eventos
+
+    // const payload = {
+    //   titulo: eventData.titulo,
+    //   tipo: eventData.tipo,
+    //   descripcion: eventData.descripcion,
+    //   fecha: eventData.fecha,
+    //   locacionId: eventData.locacionId,
+    // };
+
     const response = await fetch(`${API_BASE_URL}/eventos`, {
       method: 'POST',
       headers: getAuthHeaders(),
@@ -52,20 +64,24 @@ export const EventService = {
     return { success: true };
   },
 
-  getSalas: async () => {
-    const saved = localStorage.getItem('ticketflow_salas');
-    return saved ? JSON.parse(saved) : [];
-  },
+  // Dado a que no existen salas en el back
+  // getSalas: async () => {
+  //   const saved = localStorage.getItem('ticketflow_salas');
+  //   return saved ? JSON.parse(saved) : [];
+  // },
+
   getCategorias: async () => {
     const saved = localStorage.getItem('ticketflow_categorias');
     return saved ? JSON.parse(saved) : [];
   },
+
   getEventoCategorias: async () => {
     return [
-      { id: 'EC1', nombre: 'Música', icon: '🎵' },
-      { id: 'EC2', nombre: 'Teatro', icon: '🎭' },
-      { id: 'EC3', nombre: 'Danza', icon: '💃' },
-      { id: 'EC4', nombre: 'Cine', icon: '🎬' },
+      { id: 1, titulo: 'Música', icon: '🎵' },
+      { id: 2, titulo: 'Teatro', icon: '🎭' },
+      { id: 3, titulo: 'Danza', icon: '💃' },
+      { id: 4, titulo: 'Cine', icon: '🎬' },
+      { id: 5, titulo: 'Conferencia', icon: '🎤' },
     ];
   },
 };
@@ -83,11 +99,17 @@ export const AuthService = {
 
       const data = await response.json();
       localStorage.setItem('auth_token', data.token);
-      
-      const mockProfile = { email, nombre: email.split('@')[0], role: 'USER' };
-      localStorage.setItem('user', JSON.stringify(mockProfile));
 
-      return mockProfile;
+      const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: getAuthHeaders(), // Usamos el helper para heredar Content-Type y Bearer Token uniformemente
+      });
+
+      if (!meResponse.ok) throw new Error('Error al obtener el perfil del servidor');
+
+      const user = await meResponse.json();
+      localStorage.setItem('user', JSON.stringify(user));
+
+      return user;
     } catch (error) {
       console.error('Login error:', error.message);
       throw error;
@@ -108,21 +130,30 @@ export const AuthService = {
       });
 
       if (!response.ok) throw new Error('Error en el registro');
-
       const data = await response.json();
       localStorage.setItem('auth_token', data.token);
 
-      const mockProfile = { email: registerData.email, nombre: registerData.nombre, role: 'USER' };
-      localStorage.setItem('user', JSON.stringify(mockProfile));
+      const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: getAuthHeaders(),
+      });
 
-      return mockProfile;
+      // 🟢 CORREGIDO: Validación estricta añadida para evitar romper el LocalStorage en el registro
+      if (!meResponse.ok)
+        throw new Error('Error al obtener el perfil tras el registro');
+
+      const user = await meResponse.json();
+      localStorage.setItem('user', JSON.stringify(user));
+      return user;
     } catch (error) {
       console.error('Register error:', error.message);
       throw error;
     }
   },
 
-  getUser: () => JSON.parse(localStorage.getItem('user')),
+  getUser: () => {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  },
   logout: () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
@@ -131,15 +162,14 @@ export const AuthService = {
   isAuthenticated: () => !!localStorage.getItem('auth_token'),
 };
 
-// 🟢 RESTAURADO PARA QUE VITE NO LOGRE FALLAR EL BUILD:
 export const AdminService = {
   getUsers: async () => {
-    // Apunta a tu controlador de usuarios en Spring Boot
+    // 🟢 CORREGIDO: Apunta de forma coherente a /usuarios en sintonía con las rutas de abajo
     const response = await fetch(`${API_BASE_URL}/usuarios`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
-    if (!response.ok) return []; // Retorna vacío si falla para que no rompa la pantalla
+    if (!response.ok) return [];
     return await response.json();
   },
   deleteUser: async (id) => {
@@ -160,13 +190,45 @@ export const AdminService = {
 };
 
 export const PurchaseService = {
-  sendPurchase: async (purchaseData) => {
-    const response = await fetch(`${API_BASE_URL}/reservas`, {
+  sendPurchase: async (purchaseData, clienteId) => {
+    const response = await fetch(`${API_BASE_URL}/reservas/${clienteId}`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(purchaseData),
     });
-    if (!response.ok) throw new Error('Error al procesar la reserva');
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al procesar la reserva');
+    }
+    return await response.json();
+  },
+
+  // nuevo metodo para cambiar el estado de la reserva en la bbdd
+
+  confirmReservation: async (reservaId) => {
+    const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}/confirmar`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al confirmar la reserva');
+    }
+    return await response.json();
+  },
+
+  // llamada a cancelar la reserva cuando se aprieta en el checkout el boton de cancelar y volver
+
+  cancelReservation: async (reservaId) => {
+    const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}/cancelar`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error('Error al cancelar reserva');
+    }
     return await response.json();
   },
 };

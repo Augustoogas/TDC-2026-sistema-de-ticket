@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import formatearFechaEvento from '../utils/dateUtils';
 
 import {
   Container,
@@ -107,8 +108,8 @@ const UpcomingEvents = () => {
 
             return (
               <Box
-                key={evento.id_evento}
-                onClick={() => navigate(`/event/${evento.id_evento}`)}
+                key={evento.eventoId}
+                onClick={() => navigate(`/event/${evento.eventoId}`)}
                 sx={{
                   p: 3,
                   border: `1px solid ${theme.palette.divider}`,
@@ -127,7 +128,7 @@ const UpcomingEvents = () => {
                     fontWeight: 600,
                   }}
                 >
-                  {evento.nombre}
+                  {evento.titulo}
                 </Typography>
 
                 <Box
@@ -138,14 +139,17 @@ const UpcomingEvents = () => {
                       variant="body2"
                       sx={{ color: theme.palette.text.secondary }}
                     >
-                      {categoria.icon} {categoria.nombre}
+                      {categoria.icon} {categoria.titulo}
                     </Typography>
                   )}
                   <Typography
                     variant="body2"
                     sx={{ color: theme.palette.primary.main, fontWeight: 500 }}
                   >
-                    📅 {evento.fecha}
+                    📅
+                    {evento.fecha
+                      ? formatearFechaEvento(evento.fecha)
+                      : 'Fecha no definida'}
                   </Typography>
                 </Box>
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import formatearFechaEvento from '../utils/dateUtils';
 
 import {
   Container,
@@ -50,7 +51,7 @@ const Events = () => {
 
   // FILTRO BÚSQUEDA Y CATEGORÍA
   const eventosFiltrados = eventos.filter((evento) => {
-    const cumpleBusqueda = evento.nombre
+    const cumpleBusqueda = evento.titulo
       ?.toLowerCase()
       .includes(searchTerm.toLowerCase());
     const cumpleCategoria =
@@ -115,7 +116,7 @@ const Events = () => {
             {categorias.map((cat) => (
               <Chip
                 key={cat.id}
-                label={`${cat.icon} ${cat.nombre}`}
+                label={`${cat.icon} ${cat.titulo}`}
                 onClick={() => setSelectedCategoria(cat.id)}
                 variant={selectedCategoria === cat.id ? 'filled' : 'outlined'}
                 color={selectedCategoria === cat.id ? 'primary' : 'default'}
@@ -147,7 +148,7 @@ const Events = () => {
             const categoria = obtenerCategoria(evento.categoriaId);
             return (
               <Card
-                key={evento.id_evento}
+                key={evento.eventoId}
                 sx={{
                   height: '100%',
                   display: 'flex',
@@ -155,7 +156,7 @@ const Events = () => {
                 }}
               >
                 <CardActionArea
-                  onClick={() => navigate(`/event/${evento.id_evento}`)}
+                  onClick={() => navigate(`/event/${evento.eventoId}`)}
                   sx={{
                     height: '100%',
                     display: 'flex',
@@ -177,7 +178,7 @@ const Events = () => {
                         evento.imagen ||
                         'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=500'
                       }
-                      alt={evento.nombre}
+                      alt={evento.titulo}
                       sx={{
                         width: '100%',
                         height: '100%',
@@ -200,7 +201,7 @@ const Events = () => {
                           fontWeight: 600,
                         }}
                       >
-                        {categoria.icon} {categoria.nombre}
+                        {categoria.icon} {categoria.titulo}
                       </Box>
                     )}
                   </Box>
@@ -224,7 +225,7 @@ const Events = () => {
                         mb: 1.5,
                       }}
                     >
-                      {evento.nombre}
+                      {evento.titulo}
                     </Typography>
 
                     <Typography
@@ -233,9 +234,12 @@ const Events = () => {
                         color: theme.palette.text.secondary,
                         lineHeight: 1.3,
                         mb: 0.5,
+                        fontWeight: 500,
                       }}
                     >
-                      {evento.fecha}
+                      {evento.fecha
+                        ? formatearFechaEvento(evento.fecha)
+                        : 'Fecha no definida'}
                     </Typography>
                   </CardContent>
                 </CardActionArea>

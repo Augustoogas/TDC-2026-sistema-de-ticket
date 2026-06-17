@@ -12,6 +12,7 @@ public class Evento {
     private Long eventoId; // El ID siempre tiene que ser una variable simple
 
     private String titulo;
+    private Long categoriaId;
     private String tipo;
     private String descripcion;
 
