@@ -2,6 +2,7 @@ package com.unpaz.backend.model;
 
 import java.time.LocalDateTime;
 
+
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -11,6 +12,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Data
 public class Reserva {
@@ -20,6 +22,7 @@ public class Reserva {
 
     @ManyToOne 
     @JoinColumn(name = "cliente_id")
+    @JsonIgnoreProperties("reservas")
     private Cliente cliente; 
 
     @ManyToOne 

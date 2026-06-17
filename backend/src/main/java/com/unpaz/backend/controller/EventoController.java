@@ -80,4 +80,41 @@ public class EventoController {
         EventoDto nuevoEvento = eventoService.crearEvento(eventoDto);
         return new ResponseEntity<>(nuevoEvento, HttpStatus.CREATED);
     }
+    
+ // --- ACTUALIZAR EVENTO ---
+    @Operation(
+        summary = "Actualizar un evento existente", 
+        description = "Endpoint restringido. Permite a un ADMIN modificar los datos de un evento por su ID.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponse(responseCode = "200", description = "Evento actualizado con éxito")
+    @ApiResponse(responseCode = "404", description = "Evento no encontrado")
+    @ApiResponse(responseCode = "403", description = "Acceso denegado - Se requiere rol ADMIN")
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<EventoDto> updateEvento(@PathVariable Long id, @Valid @RequestBody EventoDto eventoDto) {
+        EventoDto eventoActualizado = eventoService.actualizarEvento(id, eventoDto);
+        return ResponseEntity.ok(eventoActualizado);
+    }
+
+    // --- ELIMINAR EVENTO ---
+    @Operation(
+        summary = "Eliminar un evento por ID", 
+        description = "Endpoint restringido. Elimina físicamente el evento de la base de datos. ¡Atención con las reservas asociadas!",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponse(responseCode = "200", description = "Evento eliminado con éxito")
+    @ApiResponse(responseCode = "404", description = "Evento no encontrado")
+    @ApiResponse(responseCode = "403", description = "Acceso denegado - Se requiere rol ADMIN")
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteEvento(@PathVariable Long id) {
+        try {
+            eventoService.eliminarEvento(id);
+            return ResponseEntity.ok().body("Evento con ID " + id + " eliminado correctamente.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+    
 }

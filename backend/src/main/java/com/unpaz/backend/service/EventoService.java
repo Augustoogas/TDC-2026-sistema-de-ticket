@@ -9,4 +9,6 @@ public interface EventoService {
     List<EventoDto> buscarEventos(String q);
     EventoDto obtenerPorId(Long id);
     EventoDto crearEvento(EventoDto eventoDto);
+    EventoDto actualizarEvento(Long id, EventoDto eventoDto);
+    void eliminarEvento(Long id);
 }
