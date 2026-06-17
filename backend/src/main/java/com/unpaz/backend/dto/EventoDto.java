@@ -36,4 +36,7 @@ public class EventoDto {
 
     @Schema(description = "Fecha y hora del evento", example = "2026-11-15T21:00:00")
     private String fecha;
+    
+    @Schema(description = "ID de la categoria", example = "1")
+    private Long categoriaId;
 }

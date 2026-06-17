@@ -37,6 +37,17 @@ export const EventService = {
   },
 
   saveEvent: async (eventData) => {
+
+    // para la creacion correcta de eventos
+
+    const payload = {
+      titulo: eventData.titulo,
+      tipo: eventData.tipo,
+      descripcion: eventData.descripcion,
+      fecha: eventData.fecha,
+      locacionId: eventData.locacionId,
+    };
+
     const response = await fetch(`${API_BASE_URL}/eventos`, {
       method: 'POST',
       headers: getAuthHeaders(),
@@ -55,10 +66,12 @@ export const EventService = {
     return { success: true };
   },
 
-  getSalas: async () => {
-    const saved = localStorage.getItem('ticketflow_salas');
-    return saved ? JSON.parse(saved) : [];
-  },
+  // Dado a que no existen salas en el back
+  // getSalas: async () => {
+  //   const saved = localStorage.getItem('ticketflow_salas');
+  //   return saved ? JSON.parse(saved) : [];
+  // },
+
   getCategorias: async () => {
     const saved = localStorage.getItem('ticketflow_categorias');
     return saved ? JSON.parse(saved) : [];
@@ -195,8 +208,7 @@ export const PurchaseService = {
 
 
   // nuevo metodo para cambiar el estado de la reserva en la bbdd
-
-
+  
   confirmReservation: async (reservaId) => {
     const response = await fetch(
       `${API_BASE_URL}/reservas/${reservaId}/confirmar`, {
@@ -211,4 +223,17 @@ export const PurchaseService = {
     return await response.json();
   },
 
+  // llamada a cancelar la reserva cuando se aprieta en el checkout el boton de cancelar y volver
+
+    cancelReservation: async (reservaId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/reservas/${reservaId}/cancelar`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+      });
+    if (!response.ok) {
+      throw new Error('Error al cancelar reserva');
+    }
+    return await response.json();
+  },
 };

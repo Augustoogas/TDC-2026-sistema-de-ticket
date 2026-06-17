@@ -66,6 +66,7 @@ public class EventoServiceImp {
         evento.setDescripcion(eventoDto.getDescripcion());
         evento.setFecha(eventoDto.getFecha());
         evento.setImagen(eventoDto.getImagen());
+        evento.setCategoriaId(eventoDto.getCategoriaId());
 
         evento.setCreador(creador);
         evento.setLocacion(locacion);

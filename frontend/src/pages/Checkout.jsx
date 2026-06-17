@@ -37,19 +37,12 @@ const Checkout = () => {
   const handlePayment = async (e) => {
     e.preventDefault();
 
-    // 2. CORREGIDO: Usamos montoTotal en vez de la variable inexistente total
     if (!montoTotal || montoTotal === 0) return;
 
     setLoading(true);
 
     const user = JSON.parse(localStorage.getItem('user'));
-
-    console.log("Usuario guardado:", user);
-
-
     const clienteId = user?.id;
-
-    console.log("clienteId:", clienteId);
 
     if (!clienteId) {
       alert('Debes iniciar sesión para completar la reserva.');
@@ -57,36 +50,31 @@ const Checkout = () => {
       return;
     }
 
-    console.log("Datos que llegaron al Checkout:", { eventoId, sectorId, nombreSector });
-    const reservaBody = {
-      nombreEvento: nombreEvento,
-      eventoId: Number(eventoId),
-      sectorId: Number(sectorId),
-      idSector: Number(sectorId),
-      nombreSector: nombreSector,
-      cantidadEntradas: Number(cantidadEntradas),
-      montoTotal: Number(montoTotal),
-    };
+    const { reservaId } = location.state || {};
 
-    console.log("Reserva a enviar:", reservaBody);
-
-    try {
-      const reserva = await PurchaseService.sendPurchase(reservaBody,clienteId);
-
-      console.log("Reserva creada:", reserva);
-      console.log(JSON.stringify(reserva, null, 2));
-
-      await PurchaseService.confirmReservation(reserva.reservaId);
-
-      alert(`¡Reserva confirmada! ID de Orden: ${reserva.reservaId}`);
-      navigate('/');
-    } catch (error) {
-      console.error(error);
-      alert(`Error al procesar el pago: ${error.message}`);
-    } finally {
+    if (!reservaId) {
+      alert('No hay reserva para confirmar');
       setLoading(false);
+      return;
     }
-  };
+
+  try {
+    const reservaConfirmada =
+      await PurchaseService.confirmReservation(reservaId);
+
+    console.log("Reserva confirmada:", reservaConfirmada);
+
+    alert(`¡Reserva confirmada! ID: ${reservaConfirmada.reservaId}`);
+
+    navigate('/');
+
+  } catch (error) {
+    console.error(error);
+    alert(`Error al procesar el pago: ${error.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Container maxWidth="sm" sx={{ py: 10 }}>
@@ -194,7 +182,20 @@ const Checkout = () => {
 
               <Button
                 fullWidth
-                onClick={() => navigate(-1)}
+                onClick={ async () => {
+                    try {
+                      const { reservaId } = location.state || {};
+
+                      if (reservaId) {
+                        await PurchaseService.cancelReservation(reservaId);
+                      }
+
+                      navigate(-1);
+                    } catch (error) {
+                      console.error(error);
+                      alert("Error al cancelar la reserva");
+                    }
+                  }}
                 sx={{
                   mt: 1,
                   textTransform: 'none',

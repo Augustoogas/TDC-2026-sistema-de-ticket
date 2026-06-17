@@ -14,6 +14,7 @@ import {
   Paper,
 } from '@mui/material';
 import { EventService } from '../services/api';
+import { PurchaseService } from '../services/api';
 
 const FILAS = [
   { letra: 'A', nombre: 'VIP', color: '#f44336', precio: 15000, asientos: 10 },
@@ -65,28 +66,47 @@ const EventDetail = () => {
     }
   };
 
-  const handleComprar = () => {
-    if (!selectedSector) return;
+
+  const handleComprar = async () => {
+  if (!selectedSector) return;
+
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const clienteId = user?.id;
 
     const total = ticketCount * selectedSector.precio;
 
-    // Ajustado para enviar los datos limpios al Checkout anterior
-    console.log("¿Qué tiene adentro el sector seleccionado?:", selectedSector);
+    const reservaBody = {
+      nombreEvento: event.titulo,
+      eventoId: event.eventoId || event.id || id,
+      sectorId: selectedSector.sectorId,
+      nombreSector: selectedSector.nombre,
+      cantidadEntradas: ticketCount,
+      montoTotal: total
+    };
 
-    
-// navigate('/checkout', { ... })
+    const reserva = await PurchaseService.sendPurchase(
+      reservaBody,
+      clienteId
+    );
+
+    console.log("Reserva creada:", reserva);
+
     navigate('/checkout', {
       state: {
-        eventoId: event.eventoId || event.id || id,
+        reservaId: reserva.reservaId,
         nombreEvento: event.titulo,
-        sectorId: selectedSector.id || selectedSector.idSector || selectedSector.sectorId,
         nombreSector: selectedSector.nombre,
         cantidadEntradas: ticketCount,
-      //   asientos: Array.from({ length: ticketCount }, (_, i) => `${selectedSector.nombre} - Ticket ${i + 1}`), // Simulación de asientos para tu Checkout anterior
-        montoTotal: total,
-      },
+        montoTotal: total
+      }
     });
-  };
+
+  } catch (error) {
+    console.error("Error creando reserva:", error);
+    alert("No se pudo crear la reserva");
+  }
+};
 
   if (loading) {
     return (
