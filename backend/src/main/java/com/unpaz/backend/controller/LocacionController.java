@@ -18,6 +18,7 @@ import java.util.List;
 @RequestMapping("/api/locaciones")
 @CrossOrigin(origins = "*")
 @Tag(name = "Locaciones", description = "Endpoints para la gestión de locaciones de eventos")
+@SecurityRequirement(name = "bearerAuth") // 🚀 Engancha TODO este controlador con el candado que ya te funciona
 public class LocacionController {
 
     @Autowired
@@ -40,7 +41,7 @@ public class LocacionController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Crear una nueva locación (Solo ADMIN)", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Crear una nueva locación (Solo ADMIN)")
     @ApiResponse(responseCode = "201", description = "Locación creada con éxito")
     @ApiResponse(responseCode = "403", description = "Acceso denegado")
     @PostMapping
@@ -49,7 +50,7 @@ public class LocacionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(locacionService.guardar(dto));
     }
 
-    @Operation(summary = "Actualizar una locación (Solo ADMIN)", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Actualizar una locación (Solo ADMIN)")
     @ApiResponse(responseCode = "200", description = "Locación actualizada con éxito")
     @ApiResponse(responseCode = "404", description = "Locación no encontrada")
     @PutMapping("/{id}")
@@ -60,7 +61,7 @@ public class LocacionController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Eliminar una locación (Solo ADMIN)", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Eliminar una locación (Solo ADMIN)")
     @ApiResponse(responseCode = "200", description = "Locación eliminada correctamente")
     @ApiResponse(responseCode = "404", description = "Locación no encontrada")
     @DeleteMapping("/{id}")
