@@ -75,4 +75,38 @@ public class EventoServiceImp {
 
         return eventoMapper.mapearDTO(eventoGuardado);
     }
+ 
+
+    public EventoDto actualizarEvento(Long id, EventoDto dto) {
+        // 1. Buscamos el evento existente
+        Evento evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + id));
+
+        // 2. Si el DTO cambia la locación, la buscamos y actualizamos
+        if (dto.getLocacionId() != null) {
+            Locacion nuevaLocacion = locacionRepository.findById(dto.getLocacionId())
+                    .orElseThrow(() -> new RuntimeException("Locación no encontrada"));
+            evento.setLocacion(nuevaLocacion);
+        }
+
+        // 3. Actualizamos los campos planos
+        evento.setTitulo(dto.getTitulo());
+        evento.setTipo(dto.getTipo());
+        evento.setDescripcion(dto.getDescripcion());
+        evento.setFecha(dto.getFecha());
+        evento.setImagen(dto.getImagen());
+        evento.setCategoriaId(dto.getCategoriaId());
+
+        //  Guardamos los cambios
+        Evento eventoActualizado = eventoRepository.save(evento);
+        return eventoMapper.mapearDTO(eventoActualizado);
+    }
+
+    public void eliminarEvento(Long id) {
+        if (!eventoRepository.existsById(id)) {
+            throw new RuntimeException("No se puede eliminar. Evento no encontrado con ID: " + id);
+        }
+        eventoRepository.deleteById(id);
+    }
+    
 }
