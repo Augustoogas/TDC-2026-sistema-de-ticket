@@ -90,8 +90,8 @@ const EventDetail = () => {
       const total = ticketCount * selectedSector.precio;
 
       const reservaBody = {
-        nombreEvento: event.titulo,
-        eventoId: event.eventoId || event.id || id,
+        nombreEvento: evento.titulo,
+        eventoId: evento.eventoId || evento.id || id,
         sectorId: selectedSector.sectorId,
         nombreSector: selectedSector.nombre,
         cantidadEntradas: ticketCount,
@@ -105,7 +105,7 @@ const EventDetail = () => {
       navigate('/checkout', {
         state: {
           reservaId: reserva.reservaId,
-          nombreEvento: event.titulo,
+          nombreEvento: evento.titulo,
           nombreSector: selectedSector.nombre,
           cantidadEntradas: ticketCount,
           montoTotal: total,
