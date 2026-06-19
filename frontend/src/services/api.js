@@ -75,13 +75,43 @@ export const EventService = {
     return saved ? JSON.parse(saved) : [];
   },
 
-  getEventoCategorias: async () => {
+  getEventoCategorias: () => {
     return [
       { id: 1, titulo: 'Música', icon: '🎵' },
       { id: 2, titulo: 'Teatro', icon: '🎭' },
       { id: 3, titulo: 'Danza', icon: '💃' },
       { id: 4, titulo: 'Cine', icon: '🎬' },
       { id: 5, titulo: 'Conferencia', icon: '🎤' },
+    ];
+  },
+};
+
+export const SectorService = {
+  getAllSectores: async () => {
+    const response = await fetch(`${API_BASE_URL}/sectores`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Error al cargar los Sectores');
+    return await response.json();
+  },
+  getSectorFilas: () => {
+    return [
+      { letra: 'A', nombre: 'VIP', color: '#f44336', precio: 15000, asientos: 10 },
+      {
+        letra: 'B',
+        nombre: 'Platea',
+        color: '#2196f3',
+        precio: 12000,
+        asientos: 12,
+      },
+      {
+        letra: 'C',
+        nombre: 'General',
+        color: '#4caf50',
+        precio: 8000,
+        asientos: 14,
+      },
     ];
   },
 };

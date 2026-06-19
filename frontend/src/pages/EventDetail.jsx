@@ -17,13 +17,10 @@ import {
 } from '@mui/material';
 
 import { EventService } from '../services/api';
+import { SectorService } from '../services/api';
 import { PurchaseService } from '../services/api';
 
-const FILAS = [
-  { letra: 'A', nombre: 'VIP', color: '#f44336', precio: 15000, asientos: 10 },
-  { letra: 'B', nombre: 'Platea', color: '#2196f3', precio: 12000, asientos: 12 },
-  { letra: 'C', nombre: 'General', color: '#4caf50', precio: 8000, asientos: 14 },
-];
+const FILAS = SectorService.getSectorFilas();
 
 const SECTORES = [
   { nombre: 'VIP', color: '#f44336', precio: 15000, disponibles: 10, sectorId: 1 },
