@@ -7,12 +7,10 @@ import {
   TextField,
   Button,
   Alert,
-  MenuItem,
-  IconButton,
-  useTheme,
+  IconButton
 } from '@mui/material';
+
 import DeleteIcon from '@mui/icons-material/Delete';
-import { getAdminStyles } from '../../../styles/adminStyles';
 
 const SalaDialog = ({
   open,
@@ -20,20 +18,47 @@ const SalaDialog = ({
   form,
   setForm,
   onSave,
-  errorMsg,
-  categorias,
+  errorMsg
 }) => {
-  const theme = useTheme();
-  const styles = getAdminStyles(theme);
 
-  const updateForm = (newValues) => {
-    setForm((prev) => ({ ...prev, ...newValues }));
+  // 🟢 Actualiza propiedades raíz como 'nombre' o 'direccion'
+  const updateField = (field, value) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  const updateFila = (index, newFila) => {
-    const copy = [...form.filas];
-    copy[index] = newFila;
-    updateForm({ filas: copy });
+  // 🟢 Agrega un sector vacío respetando SectorDTO
+  const handleAddSector = () => {
+    setForm((prev) => ({
+      ...prev,
+      sectores: [
+        ...(prev.sectores || []),
+        { sectorId: null, nombre: '', capacidad: 0 }
+      ]
+    }));
+  };
+
+  // 🟢 Modifica dinámicamente campos internos de un sector sin mutar el estado
+  const handleSectorChange = (index, field, value) => {
+    setForm((prev) => {
+      const nuevosSectores = (prev.sectores || []).map((sector, i) => {
+        if (i === index) {
+          return { ...sector, [field]: value };
+        }
+        return sector;
+      });
+      return { ...prev, sectores: nuevosSectores };
+    });
+  };
+
+  // 🟢 Borra un sector usando filter de forma segura
+  const handleDeleteSector = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      sectores: (prev.sectores || []).filter((_, i) => i !== index)
+    }));
   };
 
   return (
@@ -41,115 +66,83 @@ const SalaDialog = ({
       open={open}
       onClose={onClose}
       fullWidth
-      slotProps={{
-        paper: {
-          sx: {
-            width: 400,
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 2,
-          },
-        },
-      }}
+      maxWidth="md"
     >
-      <DialogTitle sx={styles.dialogPaper}>Gestionar Sala</DialogTitle>
+      <DialogTitle>
+        Gestionar Locación
+      </DialogTitle>
 
-      <DialogContent sx={{ ...styles.dialogPaper, pb: 0 }}>
+      <DialogContent>
         {errorMsg && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {errorMsg}
           </Alert>
         )}
 
-        <TextField
-          label="Nombre de Sala"
-          fullWidth
-          sx={{ ...styles.inputStyle, mb: 2, mt: 1 }}
-          value={form.nombre}
-          onChange={(e) => updateForm({ nombre: e.target.value })}
-        />
+        <Stack spacing={2} sx={{ mt: 2 }}>
+          <TextField
+            label="Nombre"
+            fullWidth
+            value={form.nombre || ''}
+            onChange={(e) => updateField('nombre', e.target.value)}
+          />
 
-        {form.filas.map((f, i) => (
-          <Stack
-            key={i}
-            direction="row"
-            spacing={1}
-            sx={{ mb: 1, alignItems: 'center' }}
+          <TextField
+            label="Dirección"
+            fullWidth
+            value={form.direccion || ''}
+            onChange={(e) => updateField('direccion', e.target.value)}
+          />
+
+          <Button
+            variant="outlined"
+            onClick={handleAddSector}
           >
-            <TextField
-              select
-              size="small"
-              sx={{ ...styles.inputStyle, flex: 1 }}
-              value={f.categoriaId || ''}
-              onChange={(e) => {
-                const sel = categorias.find((c) => c.id === e.target.value);
-                if (!sel) return;
+            + Agregar Sector
+          </Button>
 
-                updateFila(i, {
-                  ...f,
-                  categoriaId: sel.id,
-                  nombre: sel.nombre,
-                  precio: sel.precioBase,
-                  color: sel.color,
-                });
-              }}
+          {(form.sectores || []).map((sector, index) => (
+            <Stack
+              key={index}
+              direction="row"
+              spacing={2}
+              alignItems="center"
             >
-              {categorias.map((c) => (
-                <MenuItem key={c.id} value={c.id}>
-                  {c.nombre}
-                </MenuItem>
-              ))}
-            </TextField>
+              <TextField
+                label="Nombre Sector"
+                fullWidth
+                value={sector.nombre || ''}
+                onChange={(e) => handleSectorChange(index, 'nombre', e.target.value)}
+              />
 
-            <TextField
-              type="number"
-              size="small"
-              slotProps={{ htmlInput: { min: 1 } }}
-              sx={{ ...styles.inputStyle, width: 100 }}
-              value={f.asientos}
-              onChange={(e) =>
-                updateFila(i, {
-                  ...f,
-                  asientos: parseInt(e.target.value) || 1,
-                })
-              }
-            />
+              <TextField
+                type="number"
+                label="Capacidad"
+                fullWidth
+                value={sector.capacidad || 0}
+                onChange={(e) => handleSectorChange(index, 'capacidad', parseInt(e.target.value) || 0)}
+              />
 
-            <IconButton
-              color="error"
-              onClick={() =>
-                updateForm({ filas: form.filas.filter((_, idx) => idx !== i) })
-              }
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Stack>
-        ))}
-
-        <Button
-          onClick={() =>
-            updateForm({
-              filas: [
-                ...form.filas,
-                {
-                  letra: String.fromCharCode(65 + form.filas.length),
-                  categoriaId: '',
-                  asientos: 10,
-                },
-              ],
-            })
-          }
-        >
-          + Añadir Fila
-        </Button>
+              <IconButton
+                color="error"
+                onClick={() => handleDeleteSector(index)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Stack>
+          ))}
+        </Stack>
       </DialogContent>
 
-      <DialogActions sx={{ ...styles.dialogPaper, ...styles.centeredActions }}>
-        <Button onClick={onClose} variant="outlined" sx={styles.secondaryButton}>
+      <DialogActions>
+        <Button onClick={onClose}>
           Cancelar
         </Button>
-        <Button onClick={onSave} variant="contained">
-          Guardar Sala
+        <Button
+          variant="contained"
+          onClick={onSave}
+        >
+          Guardar
         </Button>
       </DialogActions>
     </Dialog>

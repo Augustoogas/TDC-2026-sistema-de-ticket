@@ -1,9 +1,10 @@
 // --- CONFIGURACIÓN BASE ---
-const API_BASE_URL = import.meta.env.VITE_API_URL
-  ? `${import.meta.env.VITE_API_URL}/api`
-  : 'https://ticketflowbackend.onrender.com/api';
+// const API_BASE_URL = import.meta.env.VITE_API_URL 
+//   ? `${import.meta.env.VITE_API_URL}/api` 
+//   : 'https://ticketflowbackend.onrender.com/api';
 
-// const API_BASE_URL = 'http://localhost:8081/api';
+  
+const API_BASE_URL = 'http://localhost:8081/api';
 
 // --- HELPER PARA AGREGAR TOKEN A LAS PETICIONES ---
 const getAuthHeaders = () => {
@@ -35,25 +36,32 @@ export const EventService = {
     return await response.json();
   },
 
+
+
   saveEvent: async (eventData) => {
-    // para la creacion correcta de eventos
+  const eventId = eventData.idEvento || eventData.eventoId;
+  
+  const url = eventId 
+    ? `${API_BASE_URL}/eventos/${eventId}` 
+    : `${API_BASE_URL}/eventos`;
+    
+  const method = eventId ? 'PUT' : 'POST';
 
-    // const payload = {
-    //   titulo: eventData.titulo,
-    //   tipo: eventData.tipo,
-    //   descripcion: eventData.descripcion,
-    //   fecha: eventData.fecha,
-    //   locacionId: eventData.locacionId,
-    // };
+  console.log(`🚀 Despachando a la API vía ${method} a la URL: ${url}`);
 
-    const response = await fetch(`${API_BASE_URL}/eventos`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(eventData),
-    });
-    if (!response.ok) throw new Error('Error al guardar el evento');
-    return await response.json();
-  },
+  const response = await fetch(url, {
+    method: method,
+    headers: getAuthHeaders(),
+    body: JSON.stringify(eventData),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error);
+  }
+
+  return await response.json();
+},
 
   deleteEvent: async (id) => {
     const response = await fetch(`${API_BASE_URL}/eventos/${id}`, {
@@ -64,26 +72,63 @@ export const EventService = {
     return { success: true };
   },
 
-  // Dado a que no existen salas en el back
-  // getSalas: async () => {
-  //   const saved = localStorage.getItem('ticketflow_salas');
-  //   return saved ? JSON.parse(saved) : [];
-  // },
+saveLocacion: async (locacion) => {
+  const response = await fetch(`${API_BASE_URL}/locaciones`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(locacion),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.log(error);
+    throw new Error(error);
+  }
+
+  return await response.json();
+},
 
   getCategorias: async () => {
     const saved = localStorage.getItem('ticketflow_categorias');
     return saved ? JSON.parse(saved) : [];
   },
 
+  // 🟢 CORREGIDO: Los IDs coinciden con las strings que el DTO maneja en el campo 'tipo'
   getEventoCategorias: async () => {
     return [
-      { id: 1, titulo: 'Música', icon: '🎵' },
-      { id: 2, titulo: 'Teatro', icon: '🎭' },
-      { id: 3, titulo: 'Danza', icon: '💃' },
-      { id: 4, titulo: 'Cine', icon: '🎬' },
-      { id: 5, titulo: 'Conferencia', icon: '🎤' },
+      { id: 'Música', titulo: 'Música', icon: '🎵' },
+      { id: 'Teatro', titulo: 'Teatro', icon: '🎭' },
+      { id: 'Danza', titulo: 'Danza', icon: '💃' },
+      { id: 'Cine', titulo: 'Cine', icon: '🎬' },
+      { id: 'Conferencia', titulo: 'Conferencia', icon: '🎤' }
     ];
   },
+
+
+   // locacinoes
+
+  getLocaciones: async () => {
+    const response = await fetch(`${API_BASE_URL}/locaciones`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error('Error al cargar locaciones');
+  }
+
+  return await response.json();
+  },
+
+
+deleteSala: async (id) => {
+  const response = await fetch(`${API_BASE_URL}/locaciones/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error('Error al eliminar la locación');
+  return { success: true };
+},
 };
 
 export const AuthService = {
@@ -99,9 +144,9 @@ export const AuthService = {
 
       const data = await response.json();
       localStorage.setItem('auth_token', data.token);
-
+      
       const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
-        headers: getAuthHeaders(), // Usamos el helper para heredar Content-Type y Bearer Token uniformemente
+        headers: getAuthHeaders(),
       });
 
       if (!meResponse.ok) throw new Error('Error al obtener el perfil del servidor');
@@ -138,8 +183,7 @@ export const AuthService = {
       });
 
       // 🟢 CORREGIDO: Validación estricta añadida para evitar romper el LocalStorage en el registro
-      if (!meResponse.ok)
-        throw new Error('Error al obtener el perfil tras el registro');
+      if (!meResponse.ok) throw new Error('Error al obtener el perfil tras el registro');
 
       const user = await meResponse.json();
       localStorage.setItem('user', JSON.stringify(user));
@@ -165,11 +209,11 @@ export const AuthService = {
 export const AdminService = {
   getUsers: async () => {
     // 🟢 CORREGIDO: Apunta de forma coherente a /usuarios en sintonía con las rutas de abajo
-    const response = await fetch(`${API_BASE_URL}/usuarios`, {
+    const response = await fetch(`${API_BASE_URL}/clientes`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
-    if (!response.ok) return [];
+    if (!response.ok) return []; 
     return await response.json();
   },
   deleteUser: async (id) => {
@@ -204,13 +248,15 @@ export const PurchaseService = {
     return await response.json();
   },
 
-  // nuevo metodo para cambiar el estado de la reserva en la bbdd
 
+  // nuevo metodo para cambiar el estado de la reserva en la bbdd
+  
   confirmReservation: async (reservaId) => {
-    const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}/confirmar`, {
-      method: 'PATCH',
-      headers: getAuthHeaders(),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/reservas/${reservaId}/confirmar`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+      });
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -221,11 +267,12 @@ export const PurchaseService = {
 
   // llamada a cancelar la reserva cuando se aprieta en el checkout el boton de cancelar y volver
 
-  cancelReservation: async (reservaId) => {
-    const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}/cancelar`, {
-      method: 'PATCH',
-      headers: getAuthHeaders(),
-    });
+    cancelReservation: async (reservaId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/reservas/${reservaId}/cancelar`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+      });
     if (!response.ok) {
       throw new Error('Error al cancelar reserva');
     }
