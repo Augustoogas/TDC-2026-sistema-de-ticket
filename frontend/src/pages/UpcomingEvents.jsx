@@ -47,7 +47,12 @@ const UpcomingEvents = () => {
     return categorias.find((c) => c.id === categoriaId);
   };
 
-  const eventosProximos = eventos.slice(0, 8);
+  // Filtra eventos futuros, los ordena cronológicamente y muestra los 8 más próximos
+  const ahora = new Date();
+  const eventosProximos = [...eventos]
+    .filter((evento) => new Date(evento.fecha) >= ahora)
+    .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+    .slice(0, 8);
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>

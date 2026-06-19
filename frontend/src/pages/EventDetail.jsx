@@ -1,6 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import formatearFechaEvento from '../utils/dateUtils';
+import ChairIcon from '@mui/icons-material/Chair';
+
 import {
   Box,
   Container,
@@ -13,19 +15,29 @@ import {
   useTheme,
   Paper,
 } from '@mui/material';
+
 import { EventService } from '../services/api';
+import { SectorService } from '../services/api';
 import { PurchaseService } from '../services/api';
 
-const FILAS = [
-  { letra: 'A', nombre: 'VIP', color: '#f44336', precio: 15000, asientos: 10 },
-  { letra: 'B', nombre: 'Platea', color: '#2196f3', precio: 12000, asientos: 12 },
-  { letra: 'C', nombre: 'General', color: '#4caf50', precio: 8000, asientos: 14 },
-];
+const FILAS = SectorService.getSectorFilas();
 
 const SECTORES = [
   { nombre: 'VIP', color: '#f44336', precio: 15000, disponibles: 10, sectorId: 1 },
-  { nombre: 'Platea', color: '#2196f3', precio: 12000, disponibles: 12, sectorId: 2 },
-  { nombre: 'General', color: '#4caf50', precio: 8000, disponibles: 14, sectorId: 3 },
+  {
+    nombre: 'Platea',
+    color: '#2196f3',
+    precio: 12000,
+    disponibles: 12,
+    sectorId: 2,
+  },
+  {
+    nombre: 'General',
+    color: '#4caf50',
+    precio: 8000,
+    disponibles: 14,
+    sectorId: 3,
+  },
 ];
 
 const EventDetail = () => {
@@ -33,7 +45,7 @@ const EventDetail = () => {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const [event, setEvent] = useState(null);
+  const [evento, setEvento] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSector, setSelectedSector] = useState(null);
   const [ticketCount, setTicketCount] = useState(1);
@@ -47,7 +59,7 @@ const EventDetail = () => {
         setUser(loggedUser);
 
         const data = await EventService.getEventDetail(id);
-        setEvent(data);
+        setEvento(data);
       } catch (error) {
         console.error(error);
       } finally {
@@ -58,7 +70,6 @@ const EventDetail = () => {
     fetchDetail();
   }, [id]);
 
-  // 
   const handleSelectSector = (sector) => {
     setSelectedSector(sector);
     if (ticketCount > sector.disponibles) {
@@ -66,57 +77,59 @@ const EventDetail = () => {
     }
   };
 
-
   const handleComprar = async () => {
-  if (!selectedSector) return;
+    if (!selectedSector) return;
 
-  try {
-    const user = JSON.parse(localStorage.getItem("user"));
-    const clienteId = user?.id;
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const clienteId = user?.id;
 
-    const total = ticketCount * selectedSector.precio;
+      const total = ticketCount * selectedSector.precio;
 
-    const reservaBody = {
-      nombreEvento: event.titulo,
-      eventoId: event.eventoId || event.id || id,
-      sectorId: selectedSector.sectorId,
-      nombreSector: selectedSector.nombre,
-      cantidadEntradas: ticketCount,
-      montoTotal: total
-    };
-
-    const reserva = await PurchaseService.sendPurchase(
-      reservaBody,
-      clienteId
-    );
-
-    console.log("Reserva creada:", reserva);
-
-    navigate('/checkout', {
-      state: {
-        reservaId: reserva.reservaId,
-        nombreEvento: event.titulo,
+      const reservaBody = {
+        nombreEvento: evento.titulo,
+        eventoId: evento.eventoId || evento.id || id,
+        sectorId: selectedSector.sectorId,
         nombreSector: selectedSector.nombre,
         cantidadEntradas: ticketCount,
-        montoTotal: total
-      }
-    });
+        montoTotal: total,
+      };
 
-  } catch (error) {
-    console.error("Error creando reserva:", error);
-    alert("No se pudo crear la reserva");
-  }
-};
+      const reserva = await PurchaseService.sendPurchase(reservaBody, clienteId);
+
+      console.log('Reserva creada:', reserva);
+
+      navigate('/checkout', {
+        state: {
+          reservaId: reserva.reservaId,
+          nombreEvento: evento.titulo,
+          nombreSector: selectedSector.nombre,
+          cantidadEntradas: ticketCount,
+          montoTotal: total,
+        },
+      });
+    } catch (error) {
+      console.error('Error creando reserva:', error);
+      alert('No se pudo crear la reserva');
+    }
+  };
 
   if (loading) {
     return (
-      <Box sx={{ height: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Box
+        sx={{
+          height: '80vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <CircularProgress />
       </Box>
     );
   }
 
-  if (!event) {
+  if (!evento) {
     return (
       <Typography sx={{ textAlign: 'center', mt: 10 }} variant="h6">
         Evento no encontrado
@@ -133,22 +146,34 @@ const EventDetail = () => {
       )}
 
       {/* DATOS DEL EVENTO */}
-      <Box sx={{ mb: 6, p: 4, bgcolor: theme.palette.background.paper, borderRadius: '20px' }}>
+      <Box
+        sx={{
+          mb: 6,
+          p: 4,
+          bgcolor: theme.palette.background.paper,
+          borderRadius: '20px',
+          border: `1px solid ${theme.palette.text.primary}`,
+        }}
+      >
         <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
-          {event.titulo}
+          {evento.titulo}
         </Typography>
 
-        <Typography variant="body1" sx={{ mb: 2, color: theme.palette.primary.main, fontWeight: 500 }}>
-          {event.fecha}
+        <Typography
+          variant="body1"
+          sx={{ mb: 2, color: theme.palette.primary.main, fontWeight: 500 }}
+        >
+          {evento.fecha ? formatearFechaEvento(evento.fecha) : 'Fecha no definida'}
         </Typography>
 
-        <Typography variant="body2" sx={{ mb: 2 }}>
-          {event.descripcion}
+        <Typography
+          variant="body2"
+          sx={{ mb: 2, color: theme.palette.text.secondary }}
+        >
+          {evento.descripcion}
         </Typography>
 
-        <Typography sx={{ mt: 2, color: 'text.secondary' }}>
-          Locación: {event.locacionNombre}
-        </Typography>
+        <Typography sx={{ mt: 2 }}>Locación: {evento.locacionNombre}</Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 3 }}>
           <Typography>Cantidad de entradas:</Typography>
@@ -163,54 +188,103 @@ const EventDetail = () => {
               setTicketCount(Math.min(maxLimit, Math.max(1, val)));
             }}
             disabled={!selectedSector}
-            helperText={!selectedSector ? "Selecciona un sector primero" : `Asientos: ${selectedSector.disponibles}`}
-            sx={{ width: 120 }}
+            sx={{ width: 70 }}
           />
+          <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+            {!selectedSector
+              ? 'Selecciona un sector primero'
+              : `${selectedSector.disponibles} Asientos disponibles`}
+          </Typography>
         </Box>
       </Box>
 
       {/* ESCENARIO */}
       <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Box sx={{ width: '100%', bgcolor: '#323131', color: 'white', py: 1.5, borderRadius: 2 }}>
-          <Typography variant="subtitle1" sx={{ letterSpacing: 6, fontWeight: 'bold' }}>
-            ESCENARIO
-          </Typography>
-        </Box>
+        <Typography
+          variant="subtitle2"
+          sx={{ letterSpacing: 6, fontWeight: 'bold' }}
+        >
+          ESCENARIO
+        </Typography>
       </Box>
 
       {/* MAPA DE ASIENTOS */}
       <Box sx={{ mb: 5, display: 'flex', justifyContent: 'center' }}>
         <Stack spacing={1.5} sx={{ width: '100%', alignItems: 'center' }}>
           {FILAS.map((fila) => (
-            <Box key={fila.letra} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box
+              key={fila.letra}
+              sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+            >
               <Typography variant="body2" sx={{ fontWeight: 'bold', width: 15 }}>
                 {fila.letra}
               </Typography>
+
               <Box sx={{ display: 'flex', gap: 1 }}>
                 {Array.from({ length: fila.asientos }).map((_, index) => {
                   const esSeleccionado = selectedSector?.nombre === fila.nombre;
+
                   return (
                     <Box
                       key={index}
                       onClick={() => {
-                        const sectorAsociado = SECTORES.find(s => s.nombre === fila.nombre);
-                        if (sectorAsociado) handleSelectSector(sectorAsociado);
+                        const sectorAsociado = SECTORES.find(
+                          (s) => s.nombre === fila.nombre
+                        );
+
+                        if (sectorAsociado) {
+                          handleSelectSector(sectorAsociado);
+                        }
                       }}
                       sx={{
-                        width: 24,
-                        height: 24,
+                        width: 34,
+                        height: 34,
                         bgcolor: fila.color,
                         borderRadius: 0.5,
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         cursor: 'pointer',
-                        opacity: esSeleccionado ? 1 : 0.4, // Se bajó un poco la opacidad default para notar más la selección
-                        transform: esSeleccionado ? 'scale(1.15)' : 'none',
-                        transition: 'all 0.2s',
-                        border: esSeleccionado ? '2px solid #fff' : 'none',
-                        boxShadow: esSeleccionado ? 3 : 0,
-                        '&:hover': { opacity: 1, transform: 'scale(1.1)' }
+                        opacity: esSeleccionado ? 1 : 0.4,
+                        transform: esSeleccionado ? 'scale(1.05)' : 'none',
+                        transition: 'all 0.2s ease',
+                        border: esSeleccionado
+                          ? `1px solid ${theme.palette.primary.main}`
+                          : `1px solid ${theme.palette.divider}`,
+                        boxShadow: esSeleccionado
+                          ? `0 0 2px ${theme.palette.primary.main}`
+                          : 'none',
+                        '&:hover': {
+                          opacity: 1,
+                          transform: 'scale(1.15)',
+                        },
                       }}
-                      title={`${fila.nombre} - Sector Fila ${fila.letra}`}
-                    />
+                      title={`${fila.nombre} - Asiento ${fila.letra}${index + 1}`}
+                    >
+                      <ChairIcon
+                        sx={{
+                          fontSize: 18,
+                          color: `${theme.palette.text.primary}`,
+                          opacity: 0.8,
+                        }}
+                      />
+
+                      <Typography
+                        sx={{
+                          position: 'absolute',
+                          bottom: 1,
+                          right: 2,
+                          fontSize: '0.55rem',
+                          fontWeight: 'bold',
+                          color: `${theme.palette.text.primary}`,
+                          lineHeight: 1,
+                          pointerEvents: 'none',
+                        }}
+                      >
+                        {index + 1}
+                      </Typography>
+                    </Box>
                   );
                 })}
               </Box>
@@ -220,7 +294,15 @@ const EventDetail = () => {
       </Box>
 
       {/* SECTORES CARD */}
-      <Box sx={{ mb: 5, display: 'flex', justifyContent: 'center', gap: 3, flexWrap: 'wrap' }}>
+      <Box
+        sx={{
+          mb: 5,
+          display: 'flex',
+          justifyContent: 'center',
+          gap: 3,
+          flexWrap: 'wrap',
+        }}
+      >
         {SECTORES.map((sector) => {
           const esSeleccionado = selectedSector?.nombre === sector.nombre;
           return (
@@ -234,27 +316,46 @@ const EventDetail = () => {
                 textAlign: 'center',
                 cursor: 'pointer',
                 bgcolor: sector.color,
-                color: 'white',
+                color: theme.palette.text.primary,
                 borderRadius: 3,
-                transition: 'transform 0.2s',
-                border: esSeleccionado ? '3px solid #fff' : '3px solid transparent',
+                transition: 'transform 0.2s ease',
+                border: esSeleccionado
+                  ? `2px solid ${theme.palette.text.primary}`
+                  : '2px solid transparent',
                 transform: esSeleccionado ? 'scale(1.05)' : 'none',
               }}
             >
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>{sector.nombre}</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                {sector.nombre}
+              </Typography>
               <Typography variant="body1">${sector.precio}</Typography>
-              <Typography variant="caption" sx={{ opacity: 0.9 }}>{sector.disponibles} disponibles</Typography>
+              <Typography variant="caption" sx={{ opacity: 0.9 }}>
+                {sector.disponibles} disponibles
+              </Typography>
             </Paper>
           );
         })}
       </Box>
 
       {/* LEYENDA */}
-      <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', mb: 5 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 4,
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          mb: 5,
+        }}
+      >
         {FILAS.map((fila) => (
-          <Box key={fila.letra} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box sx={{ width: 14, height: 14, bgcolor: fila.color, borderRadius: 0.5 }} />
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          <Box
+            key={fila.letra}
+            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+          >
+            <Box
+              sx={{ width: 14, height: 14, bgcolor: fila.color, borderRadius: 0.5 }}
+            />
+            <Typography variant="body2">
               {fila.nombre} - ${fila.precio}
             </Typography>
           </Box>
