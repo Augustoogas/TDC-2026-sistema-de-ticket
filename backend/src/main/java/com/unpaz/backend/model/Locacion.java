@@ -1,5 +1,7 @@
 package com.unpaz.backend.model;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,4 +23,8 @@ public class Locacion {
     private String direccion;
     private int capacidad;
     private String asientos; 
+
+    // para que la locacion se relacione con sectores
+    @OneToMany(mappedBy = "locacion", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Sector> sectores;
 }

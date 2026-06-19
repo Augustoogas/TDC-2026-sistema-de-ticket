@@ -3,7 +3,10 @@ package com.unpaz.backend.service;
 import com.unpaz.backend.dto.LocacionDTO;
 import com.unpaz.backend.mapper.LocacionMapper;
 import com.unpaz.backend.model.Locacion;
+import com.unpaz.backend.model.Sector;
 import com.unpaz.backend.repository.LocacionRepository;
+import com.unpaz.backend.repository.SectorRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,9 @@ public class LocacionService {
     @Autowired
     private LocacionMapper locacionMapper;
 
+    @Autowired
+    private SectorRepository sectorRepository;
+
     public List<LocacionDTO> listarTodas() {
         return locacionRepository.findAll().stream()
                 .map(locacionMapper::toDTO)
@@ -33,6 +39,20 @@ public class LocacionService {
     public LocacionDTO guardar(LocacionDTO dto) {
         Locacion locacion = locacionMapper.toEntity(dto);
         Locacion guardada = locacionRepository.save(locacion);
+
+        String[] sectores = dto.getAsientos().split(",");
+
+    for(String nombreSector : sectores) {
+
+        Sector sector = new Sector();
+
+        sector.setNombre(nombreSector.trim());
+        sector.setCapacidad(dto.getCapacidad()); // temporal
+        sector.setDisponibles(dto.getCapacidad());
+        sector.setLocacion(guardada);
+
+        sectorRepository.save(sector);
+    }
         return locacionMapper.toDTO(guardada);
     }
 

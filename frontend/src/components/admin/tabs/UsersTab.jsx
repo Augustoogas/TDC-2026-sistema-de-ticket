@@ -30,22 +30,23 @@ const UsersTab = ({ users, onEdit, onNew, onDelete }) => {
 
       <Table sx={s.tableContainer}>
         <TableBody>
-          {users.map((u) => (
-            <TableRow key={u.id} sx={s.tableRow}>
-              <TableCell sx={s.tableText}>
-                {u.nombre} ({u.username})
+        {users.map((u, index) => (
+          <TableRow key={u.id || u.idUsuario || u.usuarioId || index} sx={s.tableRow}>
+            <TableCell sx={s.tableText}>
+              {u.nombre || 'Sin Nombre'} ({u.email || u.correo || u.username || 'sin-email'})
               </TableCell>
-
+              
               <TableCell align="right" sx={s.actionCell}>
                 <IconButton color="primary" onClick={() => onEdit(u)}>
                   <EditIcon />
-                </IconButton>
-                <IconButton color="error" onClick={() => onDelete(u.id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
+                  </IconButton>
+                  
+                  <IconButton color="error" onClick={() => onDelete(u.id || u.idUsuario || u.usuarioId)}>
+                    <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
         </TableBody>
       </Table>
     </Paper>

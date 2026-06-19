@@ -1,5 +1,7 @@
 package com.unpaz.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -17,5 +19,6 @@ public class Sector {
 
     @ManyToOne
     @JoinColumn(name = "locacion_id")
+    @JsonIgnore
     private Locacion locacion;
 }

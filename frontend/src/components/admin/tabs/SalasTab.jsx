@@ -6,7 +6,7 @@ import {
   TableRow,
   Button,
   IconButton,
-  useTheme,
+  useTheme
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -25,20 +25,39 @@ const SalasTab = ({ salas, onEdit, onNew, onDelete }) => {
         onClick={onNew}
         sx={s.addButton}
       >
-        Nueva Sala
+        Nueva Locación
       </Button>
 
       <Table sx={s.tableContainer}>
         <TableBody>
-          {salas.map((t) => (
-            <TableRow key={t.id} sx={s.tableRow}>
-              <TableCell sx={s.tableText}>{t.nombre}</TableCell>
+          {Array.isArray(salas) && salas.map((itemSala) => (
+            <TableRow
+              key={itemSala.idLocacion || itemSala.id}
+              sx={s.tableRow}
+            >
+              <TableCell sx={s.tableText}>
+                {itemSala.nombre}
+              </TableCell>
+
+              <TableCell sx={s.tableText}>
+                {itemSala.direccion}
+              </TableCell>
 
               <TableCell align="right" sx={s.actionCell}>
-                <IconButton color="primary" onClick={() => onEdit(t)}>
+                <IconButton
+                  color="primary"
+                  onClick={() => {
+                    console.log("Enviando desde el botón del hijo:", itemSala);
+                    onEdit(itemSala);
+                  }}
+                >
                   <EditIcon />
                 </IconButton>
-                <IconButton color="error" onClick={() => onDelete(t.id)}>
+
+                <IconButton
+                  color="error"
+                  onClick={() => onDelete(itemSala.idLocacion || itemSala.id)}
+                >
                   <DeleteIcon />
                 </IconButton>
               </TableCell>

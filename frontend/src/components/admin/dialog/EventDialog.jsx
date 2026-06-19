@@ -13,14 +13,15 @@ import {
 } from '@mui/material';
 import { getAdminStyles } from '../../../styles/adminStyles';
 
-const EventDialog = ({ open, onClose, form, setForm, onSave, errorMsg, salas }) => {
+const EventDialog = ({ open, onClose, form, setForm, onSave, errorMsg, locaciones }) => {
   const theme = useTheme();
   const styles = getAdminStyles(theme);
 
   const updateField = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
-
+console.log("locaciones:", locaciones);
+console.log("locacionId:", form.locacionId); 
   return (
     <Dialog
       open={open}
@@ -81,15 +82,15 @@ const EventDialog = ({ open, onClose, form, setForm, onSave, errorMsg, salas }) 
 
           <TextField
             select
-            label="Sala"
+            label="Locación"
             fullWidth
             sx={styles.inputStyle}
-            value={form.salaId}
-            onChange={(e) => updateField('salaId', e.target.value)}
+            value={form.locacionId}
+            onChange={(e) => updateField('locacionId', e.target.value)}
           >
-            {salas.map((s) => (
-              <MenuItem key={s.id} value={s.id}>
-                {s.nombre}
+            {locaciones.map((locacion) => (
+              <MenuItem key={locacion.idLocacion} value={locacion.idLocacion}>
+                {locacion.nombre}
               </MenuItem>
             ))}
           </TextField>

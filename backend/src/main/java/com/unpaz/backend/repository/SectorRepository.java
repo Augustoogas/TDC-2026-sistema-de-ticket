@@ -4,6 +4,7 @@ import com.unpaz.backend.model.*;
 
 import jakarta.persistence.LockModeType;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,4 +18,5 @@ public interface SectorRepository extends JpaRepository<Sector, Long> {
     @Query("SELECT s FROM Sector s where s.sectorId = :id")
     Optional<Sector> findByIdForUpdate(@Param("id") Long id);
 
+    List<Sector> findByLocacionIdLocacion(Long idLocacion);
 }
