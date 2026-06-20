@@ -1,10 +1,9 @@
 // --- CONFIGURACIÓN BASE ---
-// const API_BASE_URL = import.meta.env.VITE_API_URL 
-//   ? `${import.meta.env.VITE_API_URL}/api` 
-//   : 'https://ticketflowbackend.onrender.com/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : 'https://ticketflowbackend.onrender.com/api';
 
-  
-const API_BASE_URL = 'http://localhost:8081/api';
+// const API_BASE_URL = 'http://localhost:8081/api';
 
 // --- HELPER PARA AGREGAR TOKEN A LAS PETICIONES ---
 const getAuthHeaders = () => {
@@ -16,7 +15,6 @@ const getAuthHeaders = () => {
 };
 
 // --- SERVICIOS CONECTADOS AL BACKEND REAL ---
-
 export const EventService = {
   getAllEvents: async () => {
     const response = await fetch(`${API_BASE_URL}/eventos`, {
@@ -36,32 +34,30 @@ export const EventService = {
     return await response.json();
   },
 
-
-
   saveEvent: async (eventData) => {
-  const eventId = eventData.idEvento || eventData.eventoId;
-  
-  const url = eventId 
-    ? `${API_BASE_URL}/eventos/${eventId}` 
-    : `${API_BASE_URL}/eventos`;
-    
-  const method = eventId ? 'PUT' : 'POST';
+    const eventId = eventData.idEvento || eventData.eventoId;
 
-  console.log(`🚀 Despachando a la API vía ${method} a la URL: ${url}`);
+    const url = eventId
+      ? `${API_BASE_URL}/eventos/${eventId}`
+      : `${API_BASE_URL}/eventos`;
 
-  const response = await fetch(url, {
-    method: method,
-    headers: getAuthHeaders(),
-    body: JSON.stringify(eventData),
-  });
+    const method = eventId ? 'PUT' : 'POST';
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
+    console.log(`🚀 Despachando a la API vía ${method} a la URL: ${url}`);
 
-  return await response.json();
-},
+    const response = await fetch(url, {
+      method: method,
+      headers: getAuthHeaders(),
+      body: JSON.stringify(eventData),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error);
+    }
+
+    return await response.json();
+  },
 
   deleteEvent: async (id) => {
     const response = await fetch(`${API_BASE_URL}/eventos/${id}`, {
@@ -72,21 +68,21 @@ export const EventService = {
     return { success: true };
   },
 
-saveLocacion: async (locacion) => {
-  const response = await fetch(`${API_BASE_URL}/locaciones`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(locacion),
-  });
+  saveLocacion: async (locacion) => {
+    const response = await fetch(`${API_BASE_URL}/locaciones`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(locacion),
+    });
 
-  if (!response.ok) {
-    const error = await response.text();
-    console.log(error);
-    throw new Error(error);
-  }
+    if (!response.ok) {
+      const error = await response.text();
+      console.log(error);
+      throw new Error(error);
+    }
 
-  return await response.json();
-},
+    return await response.json();
+  },
 
   getCategorias: async () => {
     const saved = localStorage.getItem('ticketflow_categorias');
@@ -95,39 +91,47 @@ saveLocacion: async (locacion) => {
 
   getEventoCategorias: () => {
     return [
-      { id: 'Música', titulo: 'Música', icon: '🎵' },
-      { id: 'Teatro', titulo: 'Teatro', icon: '🎭' },
-      { id: 'Danza', titulo: 'Danza', icon: '💃' },
-      { id: 'Cine', titulo: 'Cine', icon: '🎬' },
-      { id: 'Conferencia', titulo: 'Conferencia', icon: '🎤' }
+      { id: 1, titulo: 'Música', icon: '🎵' },
+      { id: 2, titulo: 'Teatro', icon: '🎭' },
+      { id: 3, titulo: 'Danza', icon: '💃' },
+      { id: 4, titulo: 'Cine', icon: '🎬' },
+      { id: 5, titulo: 'Conferencia', icon: '🎤' },
     ];
   },
 
-
-   // locacinoes
+  // Locaciones
+  getEventoLocaciones: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/locaciones/${id}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error('Error al cargar las locaciones del evento');
+    }
+    return await response.json();
+  },
 
   getLocaciones: async () => {
     const response = await fetch(`${API_BASE_URL}/locaciones`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
 
-  if (!response.ok) {
-    throw new Error('Error al cargar locaciones');
-  }
+    if (!response.ok) {
+      throw new Error('Error al cargar locaciones');
+    }
 
-  return await response.json();
+    return await response.json();
   },
 
-
-deleteSala: async (id) => {
-  const response = await fetch(`${API_BASE_URL}/locaciones/${id}`, {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
-  });
-  if (!response.ok) throw new Error('Error al eliminar la locación');
-  return { success: true };
-},
+  deleteSala: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/locaciones/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Error al eliminar la locación');
+    return { success: true };
+  },
 };
 
 export const SectorService = {
@@ -138,25 +142,6 @@ export const SectorService = {
     });
     if (!response.ok) throw new Error('Error al cargar los Sectores');
     return await response.json();
-  },
-  getSectorFilas: () => {
-    return [
-      { letra: 'A', nombre: 'VIP', color: '#f44336', precio: 15000, asientos: 10 },
-      {
-        letra: 'B',
-        nombre: 'Platea',
-        color: '#2196f3',
-        precio: 12000,
-        asientos: 12,
-      },
-      {
-        letra: 'C',
-        nombre: 'General',
-        color: '#4caf50',
-        precio: 8000,
-        asientos: 14,
-      },
-    ];
   },
 };
 
@@ -173,7 +158,7 @@ export const AuthService = {
 
       const data = await response.json();
       localStorage.setItem('auth_token', data.token);
-      
+
       const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: getAuthHeaders(),
       });
@@ -212,7 +197,8 @@ export const AuthService = {
       });
 
       // 🟢 CORREGIDO: Validación estricta añadida para evitar romper el LocalStorage en el registro
-      if (!meResponse.ok) throw new Error('Error al obtener el perfil tras el registro');
+      if (!meResponse.ok)
+        throw new Error('Error al obtener el perfil tras el registro');
 
       const user = await meResponse.json();
       localStorage.setItem('user', JSON.stringify(user));
@@ -242,7 +228,7 @@ export const AdminService = {
       method: 'GET',
       headers: getAuthHeaders(),
     });
-    if (!response.ok) return []; 
+    if (!response.ok) return [];
     return await response.json();
   },
   deleteUser: async (id) => {
@@ -277,15 +263,12 @@ export const PurchaseService = {
     return await response.json();
   },
 
-
-  // nuevo metodo para cambiar el estado de la reserva en la bbdd
-  
+  // Nuevo método para cambiar el estado de la reserva en la bbdd
   confirmReservation: async (reservaId) => {
-    const response = await fetch(
-      `${API_BASE_URL}/reservas/${reservaId}/confirmar`, {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-      });
+    const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}/confirmar`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -294,14 +277,12 @@ export const PurchaseService = {
     return await response.json();
   },
 
-  // llamada a cancelar la reserva cuando se aprieta en el checkout el boton de cancelar y volver
-
-    cancelReservation: async (reservaId) => {
-    const response = await fetch(
-      `${API_BASE_URL}/reservas/${reservaId}/cancelar`, {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-      });
+  // Llamada a cancelar la reserva cuando se aprieta en el checkout el boton de cancelar y volver
+  cancelReservation: async (reservaId) => {
+    const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}/cancelar`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       throw new Error('Error al cancelar reserva');
     }

@@ -14,4 +14,6 @@ public class SectorDTO {
     private int capacidad;
     private int disponibles;
     private Long locacionId;
+    private int precio;
+    private String color;
 }

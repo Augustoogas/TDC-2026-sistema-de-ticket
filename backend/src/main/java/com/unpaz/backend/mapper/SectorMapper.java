@@ -15,7 +15,8 @@ public class SectorMapper {
         dto.setNombre(sector.getNombre());
         dto.setCapacidad(sector.getCapacidad());
         dto.setDisponibles(sector.getDisponibles());
-
+        dto.setPrecio(sector.getPrecio());
+        dto.setColor(sector.getColor());
         if(sector.getLocacion() != null){
             dto.setLocacionId(sector.getLocacion().getIdLocacion());
         }

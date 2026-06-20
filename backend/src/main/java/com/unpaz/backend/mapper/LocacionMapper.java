@@ -22,7 +22,9 @@ public class LocacionMapper {
                     s.getNombre(), 
                     s.getCapacidad(), 
                     s.getDisponibles(), 
-                    s.getLocacion() != null ? s.getLocacion().getIdLocacion() : null
+                    s.getLocacion() != null ? s.getLocacion().getIdLocacion() : null,
+                    s.getPrecio(),
+                    s.getColor()
                 ))
                 .toList()
             : new ArrayList<>();

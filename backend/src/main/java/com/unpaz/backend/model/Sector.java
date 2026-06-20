@@ -16,7 +16,9 @@ public class Sector {
     private String nombre;
     private int capacidad;
     private int disponibles;
-
+    private int precio;
+    private String color;
+    
     @ManyToOne
     @JoinColumn(name = "locacion_id")
     @JsonIgnore

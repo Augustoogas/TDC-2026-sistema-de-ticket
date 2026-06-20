@@ -5,11 +5,11 @@ INSERT INTO cliente (usuario_id) VALUES (1);
 INSERT INTO "admin" (usuario_id) VALUES (2);
 INSERT INTO cliente (usuario_id) VALUES (3);
 INSERT INTO locacion (id_locacion, nombre, direccion, capacidad, asientos) VALUES (1, 'Centro Cultural UNPAZ', 'Alem 700', 200, 'Estándar');
-INSERT INTO sector (sector_id, nombre, capacidad, disponibles, locacion_id) VALUES (1, 'VIP', 100, 100, 1);
+INSERT INTO sector (sector_id, nombre, capacidad, disponibles, locacion_id, precio, color) VALUES (1, 'VIP', 10, 10, 1, 15000, '#f44336');
 INSERT INTO evento (evento_id, titulo, tipo, descripcion, admin_id, locacion_evento_id, fecha, imagen, categoria_id) VALUES (1, 'Charla Tech', 'Conferencia', 'Java y Spring Boot', 2, 1, '2026-10-05T18:00:00', 'https://images.pexels.com/photos/1181359/pexels-photo-1181359.jpeg', 1);
 
 
 INSERT INTO locacion (id_locacion, nombre, direccion, capacidad, asientos) VALUES (2, 'Teatro Avenida', 'Av Siempre Viva', 150, 'Estandar, VIP');
-INSERT INTO sector(sector_id, nombre, capacidad, disponibles, locacion_id) VALUES (2, 'VIP', 50, 50, 2);
-INSERT INTO sector(sector_id, nombre, capacidad, disponibles, locacion_id) VALUES (3, 'Estandar', 100, 100, 2);
+INSERT INTO sector(sector_id, nombre, capacidad, disponibles, locacion_id, precio, color) VALUES (2, 'PLATEA', 15, 15, 2, 12000, '#2196f3');
+INSERT INTO sector(sector_id, nombre, capacidad, disponibles, locacion_id, precio, color) VALUES (3, 'GENERAL', 20, 20, 2, 8000, '#4caf50');
 INSERT INTO evento (evento_id, titulo, tipo, descripcion, admin_id, locacion_evento_id, fecha, imagen, categoria_id) VALUES (2, 'Nikolai Lugansky', 'Concierto', 'Rachmaninoff Piano Concertos interpretados por Nikolai Lugansky', 2, 2, '2026-11-15T21:00:00', 'https://images.unsplash.com/photo-1511379938547-c1f69419868d', 1);
