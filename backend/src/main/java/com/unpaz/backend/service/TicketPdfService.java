@@ -25,9 +25,9 @@ public class TicketPdfService {
             document.open();
 
             // Identidad visual de TicketFlow
-            java.awt.Color primaryColor = new java.awt.Color(214, 52, 71); // Rojo/Coral TicketFlow
-            java.awt.Color darkColor = new java.awt.Color(30, 30, 30);      // Gris oscuro para textos
-            java.awt.Color lightGray = new java.awt.Color(245, 245, 245);  // Fondo recuadro derecho
+            java.awt.Color primaryColor = new java.awt.Color(196, 194, 72); // Amarillo TicketFlow
+            java.awt.Color darkColor = new java.awt.Color(15, 29, 32);      // Verde oscuro para textos
+            java.awt.Color lightGray = new java.awt.Color(255,255,255);  // Fondo recuadro derecho
 
             Font brandFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Font.NORMAL, primaryColor);
             Font mainTitleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, Font.NORMAL, darkColor);
@@ -53,7 +53,7 @@ public class TicketPdfService {
             codeParagraph.setSpacingAfter(15);
             document.add(codeParagraph);
 
-            document.add(new Paragraph("______________________________________________________________________________________", smallFont));
+            document.add(new Paragraph("_____________________________________________________________________________________", smallFont));
             document.add(new Paragraph(" "));
 
             // ---- CUERPO EN DOS COLUMNAS ----
@@ -117,12 +117,12 @@ public class TicketPdfService {
             rightCell.addElement(new Paragraph(" ", smallFont));
             
             // Nombre del comprador mapeado desde cliente_id
-            rightCell.addElement(new Paragraph("Nombre del asistente:", smallFont));
-            String nombreCliente = "Consumidor Final";
+            rightCell.addElement(new Paragraph("Nombre del cliente:", smallFont));
+            String nombreCompleto = "Consumidor Final";
             if (ticket.getReserva() != null && ticket.getReserva().getCliente() != null) {
-                nombreCliente = ticket.getReserva().getCliente().getNombre();
+                nombreCompleto = ticket.getReserva().getCliente().getNombre() + " " + ticket.getReserva().getCliente().getApellido();
             }
-            rightCell.addElement(new Paragraph(nombreCliente, boldDataFont));
+            rightCell.addElement(new Paragraph(nombreCompleto, boldDataFont));      
             rightCell.addElement(new Paragraph(" ", smallFont));
 
             // Precio total (mapeado de tu columna 'precio' real)

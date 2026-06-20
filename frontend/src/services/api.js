@@ -15,7 +15,6 @@ const getAuthHeaders = () => {
 };
 
 // --- SERVICIOS CONECTADOS AL BACKEND REAL ---
-
 export const EventService = {
   getAllEvents: async () => {
     const response = await fetch(`${API_BASE_URL}/eventos`, {
@@ -36,22 +35,27 @@ export const EventService = {
   },
 
   saveEvent: async (eventData) => {
-    // para la creacion correcta de eventos
+    const eventId = eventData.idEvento || eventData.eventoId;
 
-    // const payload = {
-    //   titulo: eventData.titulo,
-    //   tipo: eventData.tipo,
-    //   descripcion: eventData.descripcion,
-    //   fecha: eventData.fecha,
-    //   locacionId: eventData.locacionId,
-    // };
+    const url = eventId
+      ? `${API_BASE_URL}/eventos/${eventId}`
+      : `${API_BASE_URL}/eventos`;
 
-    const response = await fetch(`${API_BASE_URL}/eventos`, {
-      method: 'POST',
+    const method = eventId ? 'PUT' : 'POST';
+
+    console.log(`🚀 Despachando a la API vía ${method} a la URL: ${url}`);
+
+    const response = await fetch(url, {
+      method: method,
       headers: getAuthHeaders(),
       body: JSON.stringify(eventData),
     });
-    if (!response.ok) throw new Error('Error al guardar el evento');
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error);
+    }
+
     return await response.json();
   },
 
@@ -64,18 +68,28 @@ export const EventService = {
     return { success: true };
   },
 
-  // Dado a que no existen salas en el back
-  // getSalas: async () => {
-  //   const saved = localStorage.getItem('ticketflow_salas');
-  //   return saved ? JSON.parse(saved) : [];
-  // },
+  saveLocacion: async (locacion) => {
+    const response = await fetch(`${API_BASE_URL}/locaciones`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(locacion),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.log(error);
+      throw new Error(error);
+    }
+
+    return await response.json();
+  },
 
   getCategorias: async () => {
     const saved = localStorage.getItem('ticketflow_categorias');
     return saved ? JSON.parse(saved) : [];
   },
 
-  getEventoCategorias: async () => {
+  getEventoCategorias: () => {
     return [
       { id: 1, titulo: 'Música', icon: '🎵' },
       { id: 2, titulo: 'Teatro', icon: '🎭' },
@@ -83,6 +97,51 @@ export const EventService = {
       { id: 4, titulo: 'Cine', icon: '🎬' },
       { id: 5, titulo: 'Conferencia', icon: '🎤' },
     ];
+  },
+
+  // Locaciones
+  getEventoLocaciones: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/locaciones/${id}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error('Error al cargar las locaciones del evento');
+    }
+    return await response.json();
+  },
+
+  getLocaciones: async () => {
+    const response = await fetch(`${API_BASE_URL}/locaciones`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al cargar locaciones');
+    }
+
+    return await response.json();
+  },
+
+  deleteSala: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/locaciones/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Error al eliminar la locación');
+    return { success: true };
+  },
+};
+
+export const SectorService = {
+  getAllSectores: async () => {
+    const response = await fetch(`${API_BASE_URL}/sectores`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Error al cargar los Sectores');
+    return await response.json();
   },
 };
 
@@ -101,7 +160,7 @@ export const AuthService = {
       localStorage.setItem('auth_token', data.token);
 
       const meResponse = await fetch(`${API_BASE_URL}/auth/me`, {
-        headers: getAuthHeaders(), // Usamos el helper para heredar Content-Type y Bearer Token uniformemente
+        headers: getAuthHeaders(),
       });
 
       if (!meResponse.ok) throw new Error('Error al obtener el perfil del servidor');
@@ -165,7 +224,7 @@ export const AuthService = {
 export const AdminService = {
   getUsers: async () => {
     // 🟢 CORREGIDO: Apunta de forma coherente a /usuarios en sintonía con las rutas de abajo
-    const response = await fetch(`${API_BASE_URL}/usuarios`, {
+    const response = await fetch(`${API_BASE_URL}/clientes`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -204,8 +263,7 @@ export const PurchaseService = {
     return await response.json();
   },
 
-  // nuevo metodo para cambiar el estado de la reserva en la bbdd
-
+  // Nuevo método para cambiar el estado de la reserva en la bbdd
   confirmReservation: async (reservaId) => {
     const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}/confirmar`, {
       method: 'PATCH',
@@ -219,8 +277,7 @@ export const PurchaseService = {
     return await response.json();
   },
 
-  // llamada a cancelar la reserva cuando se aprieta en el checkout el boton de cancelar y volver
-
+  // Llamada a cancelar la reserva cuando se aprieta en el checkout el boton de cancelar y volver
   cancelReservation: async (reservaId) => {
     const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}/cancelar`, {
       method: 'PATCH',
@@ -230,5 +287,29 @@ export const PurchaseService = {
       throw new Error('Error al cancelar reserva');
     }
     return await response.json();
+  },
+};
+
+export const TicketService = {
+  getMyTickets: async (clienteId) => {
+    const response = await fetch(`${API_BASE_URL}/tickets/cliente/${clienteId}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error('Error al cargar los tickets');
+    }
+    return await response.json();
+  },
+
+  downloadTicket: async (ticketId) => {
+    const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}/download`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error('Error al descargar el ticket');
+    }
+    return await response.blob();
   },
 };

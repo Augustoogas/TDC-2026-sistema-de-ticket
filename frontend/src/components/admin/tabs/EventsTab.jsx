@@ -31,14 +31,14 @@ const EventsTab = ({ events, onEdit, onNew, onDelete }) => {
       <Table sx={s.tableContainer}>
         <TableBody>
           {events.map((e) => (
-            <TableRow key={e.id_evento} sx={s.tableRow}>
-              <TableCell sx={s.tableText}>{e.nombre}</TableCell>
+            <TableRow key={e.eventoId} sx={s.tableRow}>
+              <TableCell sx={s.tableText}>{e.titulo}</TableCell>
 
               <TableCell align="right" sx={s.actionCell}>
                 <IconButton color="primary" onClick={() => onEdit(e)}>
                   <EditIcon />
                 </IconButton>
-                <IconButton color="error" onClick={() => onDelete(e.id_evento)}>
+                <IconButton color="error" onClick={() => onDelete(e.eventoId)}>
                   <DeleteIcon />
                 </IconButton>
               </TableCell>

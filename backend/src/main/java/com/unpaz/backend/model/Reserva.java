@@ -27,6 +27,7 @@ public class Reserva {
 
     @ManyToOne 
     @JoinColumn(name = "evento_id")
+    @JsonIgnoreProperties({"creador", "locacion"})
     private Evento evento;  
 
     private Double montoTotal;
@@ -37,9 +38,10 @@ public class Reserva {
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaExpiracion;
 
-    // agreagmos cantidad de entradas por sector y relacionamos reserva con el sector
+    // Agregamos cantidad de entradas por sector y relacionamos reserva con el sector
     @ManyToOne
     @JoinColumn(name =  "sector_id")
+    @JsonIgnoreProperties({"locacion"})
     private Sector sector;
     private int cantidadEntradas;
 }

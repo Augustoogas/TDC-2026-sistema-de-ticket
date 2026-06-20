@@ -20,12 +20,19 @@ const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log("State recibido:", location.state);
-  
+  console.log('State recibido:', location.state);
+
   const [loading, setLoading] = useState(false);
 
   // 1. CORREGIDO: Extraemos las variables exactas del estado (arreglado typo cantidadEntradas)
-  const { nombreEvento, eventoId, sectorId, nombreSector, cantidadEntradas, montoTotal } = location.state || {
+  const {
+    nombreEvento,
+    // eventoId,
+    // sectorId,
+    nombreSector,
+    cantidadEntradas,
+    montoTotal,
+  } = location.state || {
     nombreEvento: 'Evento no seleccionado',
     eventoId: null,
     sectorId: null,
@@ -58,23 +65,21 @@ const Checkout = () => {
       return;
     }
 
-  try {
-    const reservaConfirmada =
-      await PurchaseService.confirmReservation(reservaId);
+try {
+       const reservaConfirmada = await PurchaseService.confirmReservation(reservaId);
 
-    console.log("Reserva confirmada:", reservaConfirmada);
+       console.log('Reserva confirmada:', reservaConfirmada);
 
-    alert(`¡Reserva confirmada! ID: ${reservaConfirmada.reservaId}`);
+       alert(`¡Reserva confirmada! ID: ${reservaConfirmada.reservaId}`);
 
-    navigate('/');
-
-  } catch (error) {
-    console.error(error);
-    alert(`Error al procesar el pago: ${error.message}`);
-  } finally {
-    setLoading(false);
-  }
-};
+       navigate('/my-tickets');
+     } catch (error) {
+      console.error(error);
+      alert(`Error al procesar el pago: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Container maxWidth="sm" sx={{ py: 10 }}>
@@ -107,7 +112,10 @@ const Checkout = () => {
             border: `1px solid ${theme.palette.divider}`,
           })}
         >
-          <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 600 }}>
+          <Typography
+            variant="overline"
+            sx={{ color: 'primary.main', fontWeight: 600 }}
+          >
             RESUMEN
           </Typography>
 
@@ -116,7 +124,8 @@ const Checkout = () => {
           </Typography>
 
           <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>
-            Sector: <strong>{nombreSector}</strong> — {cantidadEntradas} {cantidadEntradas === 1 ? 'entrada' : 'entradas'}
+            Sector: <strong>{nombreSector}</strong> — {cantidadEntradas}{' '}
+            {cantidadEntradas === 1 ? 'entrada' : 'entradas'}
           </Typography>
 
           <Typography
@@ -137,7 +146,12 @@ const Checkout = () => {
           </Typography>
 
           <Stack spacing={2.2}>
-            <TextField label="Nombre en la tarjeta" fullWidth required variant="outlined" />
+            <TextField
+              label="Nombre en la tarjeta"
+              fullWidth
+              required
+              variant="outlined"
+            />
             <TextField
               label="Número de tarjeta"
               fullWidth
@@ -147,10 +161,15 @@ const Checkout = () => {
             />
 
             <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <TextField label="Vencimiento" fullWidth required variant="outlined" />
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label="Vencimiento"
+                  fullWidth
+                  required
+                  variant="outlined"
+                />
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="CVV"
                   type="password"
@@ -182,20 +201,20 @@ const Checkout = () => {
 
               <Button
                 fullWidth
-                onClick={ async () => {
-                    try {
-                      const { reservaId } = location.state || {};
+                onClick={async () => {
+                  try {
+                    const { reservaId } = location.state || {};
 
-                      if (reservaId) {
-                        await PurchaseService.cancelReservation(reservaId);
-                      }
-
-                      navigate(-1);
-                    } catch (error) {
-                      console.error(error);
-                      alert("Error al cancelar la reserva");
+                    if (reservaId) {
+                      await PurchaseService.cancelReservation(reservaId);
                     }
-                  }}
+
+                    navigate(-1);
+                  } catch (error) {
+                    console.error(error);
+                    alert('Error al cancelar la reserva');
+                  }
+                }}
                 sx={{
                   mt: 1,
                   textTransform: 'none',

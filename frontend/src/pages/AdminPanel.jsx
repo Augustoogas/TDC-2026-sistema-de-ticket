@@ -13,7 +13,7 @@ import CategoriasTab from '../components/admin/tabs/CategoriasTab';
 const AdminPanel = () => {
   const theme = useTheme();
   const [tab, setTab] = useState(0);
-  const [salas, setSalas] = useState([]);
+  const [locaciones, setLocaciones] = useState([]);
   const [events, setEvents] = useState([]);
   const [users, setUsers] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -24,7 +24,12 @@ const AdminPanel = () => {
   const [openUser, setOpenUser] = useState(false);
   const [openCat, setOpenCat] = useState(false);
 
-  const [salaForm, setSalaForm] = useState({ id: null, nombre: '', filas: [] });
+  const [locacionForm, setLocacionForm] = useState({
+  idLocacion: null,
+  nombre: '',
+  direccion: '',
+  sectores: []
+});
   const [eventForm, setEventForm] = useState({
     id_evento: null,
     nombre: '',
@@ -32,7 +37,7 @@ const AdminPanel = () => {
     horaStr: '',
     descripcion: '',
     imagen: '',
-    salaId: '',
+    locacionId: '',
   });
   const [userForm, setUserForm] = useState({
     id: null,
@@ -48,13 +53,13 @@ const AdminPanel = () => {
   });
 
   const loadData = async () => {
-    const [s, e, u, c] = await Promise.all([
-      EventService.getSalas(),
+    const [l, e, u, c] = await Promise.all([
+      EventService.getLocaciones(),
       EventService.getAllEvents(),
       AdminService.getUsers(),
       EventService.getCategorias(),
     ]);
-    setSalas(s);
+    setLocaciones(l);
     setEvents(e);
     setUsers(u);
     setCategorias(c);
@@ -62,13 +67,13 @@ const AdminPanel = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [s, e, u, c] = await Promise.all([
-        EventService.getSalas(),
+      const [ l, e, u, c] = await Promise.all([
+        EventService.getLocaciones(),
         EventService.getAllEvents(),
         AdminService.getUsers(),
         EventService.getCategorias(),
       ]);
-      setSalas(s);
+      setLocaciones(l);
       setEvents(e);
       setUsers(u);
       setCategorias(c);
@@ -112,18 +117,9 @@ const AdminPanel = () => {
       if (!texto || !texto.includes(' de ')) return '';
       try {
         const meses = {
-          enero: '01',
-          febrero: '02',
-          marzo: '03',
-          abril: '04',
-          mayo: '05',
-          junio: '06',
-          julio: '07',
-          agosto: '08',
-          septiembre: '09',
-          octubre: '10',
-          noviembre: '11',
-          diciembre: '12',
+          enero: '01', febrero: '02', marzo: '03', abril: '04',
+          mayo: '05', junio: '06', julio: '07', agosto: '08',
+          septiembre: '09', octubre: '10', noviembre: '11', diciembre: '12',
         };
 
         const partes = texto.split(' ');
@@ -143,27 +139,33 @@ const AdminPanel = () => {
       return match ? match[1] : '';
     };
 
-    let idEncontrado = e.salaId || e.id_sala || '';
+    let idEncontrado = e.idLocacion || e.id_locacion || '';
 
-    if (!idEncontrado && salas.length > 0) {
-      const coincidencia = salas.find((s) =>
-        e.nombre.toLowerCase().includes(s.nombre.toLowerCase())
-      );
-      if (coincidencia) idEncontrado = coincidencia.id;
+    if (!idEncontrado && locaciones && locaciones.length > 0) {
+      const nombreEventoSeguro = (e.nombre || e.titulo || '').toLowerCase();
+      
+      const coincidencia = locaciones.find((l) => {
+        const nombreLocacionSeguro = (l.nombre || '').toLowerCase();
+        return nombreLocacionSeguro !== '' && nombreEventoSeguro.includes(nombreLocacionSeguro);
+      });
+      
+      if (coincidencia) idEncontrado = coincidencia.idLocacion;
     }
 
     setEventForm({
-      id_evento: e.id_evento || e.id,
-      nombre: e.nombre || '',
+      idEvento: e.eventoId || e.idEvento || e.id || null, 
+      eventoId: e.eventoId || null, 
+      nombre: e.titulo || e.nombre || '', 
       fechaStr: parseFechaAmigable(e.fecha || e.fechaStr || ''),
       horaStr: parseHoraAmigable(e.fecha || e.horaStr || ''),
       descripcion: e.descripcion || '',
       imagen: e.imagen || '',
-      salaId: idEncontrado,
+      locacionId: idEncontrado,
     });
 
     setOpenEvent(true);
   };
+
 
   const handleSaveEvent = async () => {
     setErrorMsg('');
@@ -172,7 +174,7 @@ const AdminPanel = () => {
       !eventForm.nombre?.trim() ||
       !eventForm.fechaStr ||
       !eventForm.horaStr ||
-      !eventForm.salaId ||
+      !eventForm.locacionId ||
       !eventForm.descripcion?.trim()
     ) {
       return setErrorMsg('Error: Todos los campos son obligatorios.');
@@ -182,32 +184,102 @@ const AdminPanel = () => {
     if (fechaSel < new Date()) {
       return setErrorMsg('Error: La fecha no puede ser anterior a la actual.');
     }
+     const user = JSON.parse(localStorage.getItem('user'));
 
-    await EventService.saveEvent(eventForm);
-    closeModals();
-    loadData();
+    const payload = {
+      idEvento: eventForm.idEvento || eventForm.eventoId || null,
+      eventoId: eventForm.idEvento || eventForm.eventoId || null,
+      titulo: eventForm.nombre,
+      descripcion: eventForm.descripcion,
+      fecha: `${eventForm.fechaStr}T${eventForm.horaStr}:00`,
+      locacionId: Number(eventForm.locacionId),
+      creadorId: user?.id || null, 
+      tipo: 'Conferencia',
+      categoriaId: 1,
+      imagen: eventForm.imagen || '' 
+    };
+
+    console.log("=== INSPECCIÓN DE PAYLOAD ANTES DE ENVIAR ===");
+    console.log("Objeto payload completo:", payload);
+    console.log("¿Tiene idEvento?:", payload.idEvento);
+
+    try {
+      await EventService.saveEvent(payload);
+      closeModals();
+      loadData();
+    } catch (err) {
+      console.error("Error al guardar el evento:", err);
+      setErrorMsg('Error al conectar con el servidor: ' + err.message);
+    }
   };
 
-  const handleSaveSala = async () => {
-    setErrorMsg('');
+const handleSaveSala = async () => {
+  setErrorMsg('');
 
-    if (!salaForm.nombre.trim()) {
-      return setErrorMsg('El nombre de la sala es obligatorio.');
-    }
+  if (!locacionForm.nombre?.trim() || !locacionForm.direccion?.trim()) {
+    return setErrorMsg('El nombre y la dirección son obligatorios.');
+  }
 
-    if (salaForm.filas.length === 0) {
-      return setErrorMsg('La sala debe tener al menos una fila.');
-    }
+  if (!locacionForm.sectores || locacionForm.sectores.length === 0) {
+    return setErrorMsg('Debe existir al menos un sector.');
+  }
 
-    const filasSinCategoria = salaForm.filas.some((f) => !f.categoriaId);
-    if (filasSinCategoria) {
-      return setErrorMsg('Todas las filas deben tener categoría.');
-    }
+  const sectorInvalido = locacionForm.sectores.some(
+    s => !s.nombre?.trim() || s.capacidad <= 0
+  );
+  if (sectorInvalido) {
+    return setErrorMsg('Todos los sectores deben tener nombre y capacidad.');
+  }
 
-    await EventService.saveSala(salaForm);
+  const capacidadTotal = locacionForm.sectores.reduce((acc, cur) => acc + Number(cur.capacidad), 0);
+  const stringAsientos = locacionForm.sectores.map(s => s.nombre.trim()).join(', ');
+
+  const payload = {
+    idLocacion: locacionForm.idLocacion || null, 
+    nombre: locacionForm.nombre.trim(),
+    direccion: locacionForm.direccion.trim(),
+    capacidad: capacidadTotal,
+    asientos: stringAsientos,
+    
+    sectores: locacionForm.sectores.map(s => {
+      const sectorData = {
+        nombre: s.nombre.trim(),
+        capacidad: Number(s.capacidad),
+        disponibles: Number(s.capacidad)
+      };
+
+      if (s.sectorId || s.idSector) {
+        sectorData.sectorId = s.sectorId || s.idSector;
+      }
+
+      return sectorData;
+    })
+  };
+
+  try {
+    console.log("Enviando JSON a Spring Boot:", payload);
+    await EventService.saveLocacion(payload);
+    closeModals();
+    loadData(); 
+  } catch (err) {
+    console.warn("Se atrapó un error en la respuesta, refrescando datos por si impactó:", err);
     closeModals();
     loadData();
-  };
+  }
+};
+
+
+const handleEditSala = (sala) => {
+
+  console.log("Objeto recibido en handleEditSala:", sala);
+  setLocacionForm({
+    idLocacion: sala.idLocacion || null,
+    nombre: sala.nombre || '',
+    direccion: sala.direccion || '',
+    sectores: Array.isArray(sala.sectores) ? sala.sectores : []
+  });
+  setOpenSala(true);
+};
 
   const handleSaveUser = async () => {
     if (
@@ -272,7 +344,7 @@ const AdminPanel = () => {
               fechaStr: '',
               horaStr: '',
               descripcion: '',
-              salaId: '',
+              locacionId: '',
             });
             setOpenEvent(true);
           }}
@@ -283,15 +355,12 @@ const AdminPanel = () => {
 
       {tab === 1 && (
         <SalasTab
-          salas={salas}
+          salas={locaciones}
           onNew={() => {
-            setSalaForm({ id: null, nombre: '', filas: [] });
+            setLocacionForm({ idLocacion: null, nombre: '', direccion: '', sectores: [] });
             setOpenSala(true);
           }}
-          onEdit={(s) => {
-            setSalaForm(s);
-            setOpenSala(true);
-          }}
+          onEdit={(salaSeleccionada) => handleEditSala(salaSeleccionada)}
           onDelete={handleDeleteSala}
         />
       )}
@@ -339,14 +408,14 @@ const AdminPanel = () => {
         setForm={setEventForm}
         onSave={handleSaveEvent}
         errorMsg={errorMsg}
-        salas={salas}
+        locaciones={locaciones}
       />
 
       <SalaDialog
         open={openSala}
         onClose={closeModals}
-        form={salaForm}
-        setForm={setSalaForm}
+        form={locacionForm}
+        setForm={setLocacionForm}
         onSave={handleSaveSala}
         errorMsg={errorMsg}
         categorias={categorias}

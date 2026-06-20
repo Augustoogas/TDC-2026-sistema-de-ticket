@@ -14,6 +14,8 @@ import {
 import DownloadIcon from '@mui/icons-material/Download';
 import EventIcon from '@mui/icons-material/Event';
 import { useNavigate } from 'react-router-dom';
+import { TicketService } from '../services/api';
+import formatearFechaEvento from '../utils/dateUtils';
 
 const MyTickets = () => {
   const theme = useTheme();
@@ -22,41 +24,13 @@ const MyTickets = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: reemplazar por llamada al backend para obtener los tickets del usuario
     const fetchTickets = async () => {
       try {
-        // Aquí iría la llamada a la API
-        // Por ahora, simulamos con datos locales
-        const mockTickets = [
-          {
-            id: 1,
-            evento: 'Gala de Orquesta - Teatro UNPAZ',
-            fecha: '28 de Octubre - 21:00 hs',
-            asiento: 'A-5',
-            precio: 5000,
-            estado: 'activo',
-            numeroTicket: 'TK-2026-001',
-          },
-          {
-            id: 2,
-            evento: 'Stand Up Night - Humor en Vivo',
-            fecha: '11 de Noviembre - 22:00 hs',
-            asiento: 'B-12',
-            precio: 1800,
-            estado: 'activo',
-            numeroTicket: 'TK-2026-002',
-          },
-          {
-            id: 3,
-            evento: 'Ciclo de Cine - Clásicos del Siglo XX',
-            fecha: '15 de Noviembre - 20:00 hs',
-            asiento: 'A-8',
-            precio: 1200,
-            estado: 'activo',
-            numeroTicket: 'TK-2026-003',
-          },
-        ];
-        setTickets(mockTickets);
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user?.id) {
+          const ticketsData = await TicketService.getMyTickets(user.id);
+          setTickets(ticketsData);
+        }
       } catch (error) {
         console.error('Error cargando tickets:', error);
       } finally {
@@ -66,32 +40,6 @@ const MyTickets = () => {
 
     fetchTickets();
   }, []);
-
-  const getStatusColor = (estado) => {
-    switch (estado) {
-      case 'activo':
-        return 'success';
-      case 'usado':
-        return 'default';
-      case 'cancelado':
-        return 'error';
-      default:
-        return 'default';
-    }
-  };
-
-  const getStatusLabel = (estado) => {
-    switch (estado) {
-      case 'activo':
-        return 'Activo';
-      case 'usado':
-        return 'Utilizado';
-      case 'cancelado':
-        return 'Cancelado';
-      default:
-        return estado;
-    }
-  };
 
   return (
     <Container maxWidth="sm" sx={{ py: 6 }}>
@@ -131,113 +79,140 @@ const MyTickets = () => {
         </Box>
       ) : tickets.length > 0 ? (
         <Stack spacing={3}>
-          {tickets.map((ticket) => (
-            <Card
-              key={ticket.id}
-              sx={{
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  boxShadow: theme.shadows[4],
-                  transform: 'scale(1.02)',
-                },
-              }}
-            >
-              <CardContent>
-                <Stack
-                  direction={{ xs: 'column', md: 'row' }}
-                  spacing={3}
-                  justifyContent="space-between"
-                  alignItems={{ xs: 'flex-start', md: 'center' }}
-                >
-                  {/* INFORMACIÓN DEL EVENTO */}
-                  <Box sx={{ flex: 1 }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 600,
-                        mb: 1,
-                      }}
-                    >
-                      {ticket.evento}
-                    </Typography>
-
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: theme.palette.text.secondary,
-                        mb: 1,
-                      }}
-                    >
-                      📅 {ticket.fecha}
-                    </Typography>
-
-                    <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                      <Box>
-                        <Typography
-                          variant="caption"
-                          sx={{ color: theme.palette.text.secondary }}
-                        >
-                          Asiento
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {ticket.asiento}
-                        </Typography>
-                      </Box>
-
-                      <Box>
-                        <Typography
-                          variant="caption"
-                          sx={{ color: theme.palette.text.secondary }}
-                        >
-                          Número de Ticket
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {ticket.numeroTicket}
-                        </Typography>
-                      </Box>
-
-                      <Box>
-                        <Typography
-                          variant="caption"
-                          sx={{ color: theme.palette.text.secondary }}
-                        >
-                          Precio
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          ${ticket.precio}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </Box>
-
-                  {/* ESTADO Y ACCIONES */}
+          {tickets.map((ticket) => {
+            const eventoFinalizado =
+              ticket.evento?.fecha && new Date() > new Date(ticket.evento.fecha);
+            return (
+              <Card
+                key={ticket.ticketId}
+                sx={{
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    boxShadow: theme.shadows[4],
+                    transform: 'scale(1.02)',
+                  },
+                }}
+              >
+                <CardContent>
                   <Stack
-                    spacing={2}
+                    direction={{ xs: 'column', md: 'row' }}
+                    spacing={3}
                     sx={{
-                      alignItems: { xs: 'flex-start', md: 'flex-end' },
-                      width: { xs: '100%', md: 'auto' },
+                      justifyContent: 'space-between',
+                      alignItems: {
+                        xs: 'flex-start',
+                        md: 'center',
+                      },
                     }}
                   >
-                    <Chip
-                      label={getStatusLabel(ticket.estado)}
-                      color={getStatusColor(ticket.estado)}
-                      variant="outlined"
-                    />
-
-                    <Stack direction="row" spacing={1}>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<DownloadIcon />}
+                    {/* INFORMACIÓN DEL EVENTO */}
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: 600,
+                          mb: 1,
+                        }}
                       >
-                        Descargar
-                      </Button>
+                        {ticket.evento?.titulo || 'Evento no especificado'}
+                      </Typography>
+
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: theme.palette.text.secondary,
+                          mb: 1,
+                        }}
+                      >
+                        {ticket.reserva?.fechaCreacion
+                          ? formatearFechaEvento(ticket.reserva.fechaCreacion)
+                          : 'Fecha no disponible'}
+                      </Typography>
+
+                      <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                        <Box>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: theme.palette.text.secondary }}
+                          >
+                            Locación
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {ticket.evento?.locacion?.nombre || 'Sin locación'}
+                          </Typography>
+                        </Box>
+
+                        <Box>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: theme.palette.text.secondary }}
+                          >
+                            Número de Ticket
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            TK-{String(ticket.ticketId).padStart(6, '0')}
+                          </Typography>
+                        </Box>
+
+                        <Box>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: theme.palette.text.secondary }}
+                          >
+                            Precio
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            ${ticket.precio}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </Box>
+
+                    {/* ESTADO Y ACCIONES */}
+                    <Stack
+                      spacing={2}
+                      sx={{
+                        alignItems: { xs: 'flex-start', md: 'flex-end' },
+                        width: { xs: '100%', md: 'auto' },
+                      }}
+                    >
+                      <Chip
+                        label={eventoFinalizado ? 'Finalizado' : 'Activo'}
+                        color={eventoFinalizado ? 'error' : 'success'}
+                        variant="outlined"
+                      />
+
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<DownloadIcon />}
+                          onClick={async () => {
+                            try {
+                              const blob = await TicketService.downloadTicket(
+                                ticket.ticketId
+                              );
+                              const url = window.URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = `ticket-${ticket.ticketId}.pdf`;
+                              a.click();
+                              window.URL.revokeObjectURL(url);
+                            } catch (error) {
+                              console.error('Error downloading ticket:', error);
+                              alert('No se pudo descargar el ticket');
+                            }
+                          }}
+                        >
+                          Descargar
+                        </Button>
+                      </Stack>
                     </Stack>
                   </Stack>
-                </Stack>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </Stack>
       ) : (
         <Box sx={{ textAlign: 'center', py: 8 }}>
