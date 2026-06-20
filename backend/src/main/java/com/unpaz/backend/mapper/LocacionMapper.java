@@ -14,16 +14,16 @@ public class LocacionMapper {
     public LocacionDTO toDTO(Locacion locacion) {
         if (locacion == null) return null;
 
-        // tuve que agregar esto para evitar el nullexception
         List<SectorDTO> sectoresDTO = (locacion.getSectores() != null) 
             ? locacion.getSectores().stream()
                 .map(s -> new SectorDTO(
                     s.getSectorId(), 
                     s.getNombre(), 
-                    s.getCapacidad(), 
-                    s.getDisponibles(), 
+                    // Si capacidad, disponibles o precio son null en el objeto, mandamos 0 defensivo
+                    s.getCapacidad() != null ? s.getCapacidad() : 0, 
+                    s.getDisponibles() != null ? s.getDisponibles() : 0, 
                     s.getLocacion() != null ? s.getLocacion().getIdLocacion() : null,
-                    s.getPrecio(),
+                    s.getPrecio() != null ? s.getPrecio() : 0, // Aquí evitamos el NullPointerException del unboxing
                     s.getColor()
                 ))
                 .toList()

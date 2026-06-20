@@ -11,9 +11,9 @@ public class SectorDTO {
 
     private Long sectorId;
     private String nombre;
-    private int capacidad;
-    private int disponibles;
+    private Integer capacidad;
+    private Integer disponibles;
     private Long locacionId;
-    private int precio;
+    private Integer precio;
     private String color;
 }

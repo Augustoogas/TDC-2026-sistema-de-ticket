@@ -14,9 +14,9 @@ public class Sector {
     private Long sectorId;
     
     private String nombre;
-    private int capacidad;
-    private int disponibles;
-    private int precio;
+    private Integer capacidad;
+    private Integer disponibles;
+    private Integer precio;
     private String color;
     
     @ManyToOne
