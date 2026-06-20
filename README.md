@@ -220,7 +220,7 @@ Este proyecto es un trabajo grupal desarrollado para UNPAZ como parte del trabaj
 - **Daniel** - [GitHub](https://github.com/DanOlmed)
 - **Lucia** - [GitHub](https://github.com/luciel23)
 - **Augusto** - [GitHub](https://github.com/Augustoogas)
-- **Leo** - ¿?
+- **Leo** - [GitHub](https://github.com/leovera317)
 
 ## 💡 Soporte
 

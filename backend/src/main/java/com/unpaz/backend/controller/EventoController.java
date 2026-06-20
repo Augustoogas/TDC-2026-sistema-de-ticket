@@ -7,8 +7,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.unpaz.backend.dto.EventoDto;
-import com.unpaz.backend.model.Evento;
-import com.unpaz.backend.repository.EventoRepository;
 import com.unpaz.backend.service.EventoServiceImp;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,9 +22,6 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 @Tag(name = "Eventos", description = "Endpoints para la gestión y consulta de eventos")
 public class EventoController {
-
-    @Autowired
-    private EventoRepository eventoRepository;
     @Autowired
     private EventoServiceImp eventoService;
     
@@ -43,7 +38,7 @@ public class EventoController {
 
 
     // obtener el evento concreto
-   @Operation(
+    @Operation(
         summary = "Obtener evento por ID",
         description = "Retorna los datos de un evento específico"
     )
@@ -116,5 +111,4 @@ public class EventoController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
-    
 }

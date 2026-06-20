@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import com.unpaz.backend.model.Ticket;
 import com.unpaz.backend.repository.TicketRepository;
 
-import lombok.RequiredArgsConstructor;
 @Service
 
 public class TicketService {
