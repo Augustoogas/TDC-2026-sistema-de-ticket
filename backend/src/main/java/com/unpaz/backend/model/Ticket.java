@@ -1,5 +1,7 @@
 package com.unpaz.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,8 +21,11 @@ public class Ticket {
 	
     @ManyToOne // Un evento puede tener muchos tickets vendidos
     @JoinColumn(name = "id_reserva")
+    @JsonIgnoreProperties({"cliente", "evento", "sector"})
     private Reserva reserva;
+    
     @ManyToOne
     @JoinColumn(name = "id_evento")
+    @JsonIgnoreProperties("creador")
     private Evento evento;
 }

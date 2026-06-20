@@ -25,13 +25,15 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 @Tag(name = "Tickets", description = "Endpoints para la generación y consulta de comprobantes de entrada")
 public class TicketController {
-	private TicketService ticketService = null; 
-	public TicketController(TicketService ticketService) {
+    private final TicketService ticketService;
+
+    public TicketController(TicketService ticketService) {
         this.ticketService = ticketService;
     }
 
-	@Autowired
-	private TicketPdfService ticketPdfService; 
+    @Autowired
+    private TicketPdfService ticketPdfService;
+
     @Autowired
     private TicketRepository ticketRepository;
 
@@ -56,6 +58,16 @@ public class TicketController {
         return ticketRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(
+        summary = "Obtener tickets por cliente",
+        description = "Devuelve todos los tickets asociados al cliente mediante su reserva."
+    )
+    @ApiResponse(responseCode = "200", description = "Lista de tickets obtenida")
+    @GetMapping("/cliente/{clienteId}")
+    public List<Ticket> getTicketsByClienteId(@PathVariable Long clienteId) {
+        return ticketService.findByClienteId(clienteId);
     }
 
     @Operation(

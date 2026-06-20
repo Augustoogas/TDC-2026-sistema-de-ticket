@@ -289,3 +289,27 @@ export const PurchaseService = {
     return await response.json();
   },
 };
+
+export const TicketService = {
+  getMyTickets: async (clienteId) => {
+    const response = await fetch(`${API_BASE_URL}/tickets/cliente/${clienteId}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error('Error al cargar los tickets');
+    }
+    return await response.json();
+  },
+
+  downloadTicket: async (ticketId) => {
+    const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}/download`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error('Error al descargar el ticket');
+    }
+    return await response.blob();
+  },
+};

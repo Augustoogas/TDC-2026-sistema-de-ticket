@@ -13,6 +13,7 @@ import com.unpaz.backend.repository.ReservaRepository;
 import com.unpaz.backend.repository.SectorRepository;
 import com.unpaz.backend.repository.UsuarioRepository;
 import com.unpaz.backend.model.*;
+import com.unpaz.backend.repository.TicketRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +28,7 @@ public class ReservaServiceImp implements ReservaService {
     private final UsuarioRepository userRepo;
     private final SectorRepository sectorRepo;
     private final ReservaMapper reservaMapper;
+    private final TicketRepository ticketRepo;
 
     private final static int MINUTOS_EXPIRACION = 15;
     private final static int MAXIMO_ENTRADAS = 10;
@@ -123,6 +125,12 @@ public class ReservaServiceImp implements ReservaService {
         reserva.setEstado(EstadoReserva.PAGADA);
 
         Reserva reservaGuardada = reservaRepo.save(reserva);
+
+        Ticket ticket = new Ticket();
+        ticket.setPrecio(reservaGuardada.getMontoTotal() != null ? reservaGuardada.getMontoTotal().floatValue() : 0f);
+        ticket.setReserva(reservaGuardada);
+        ticket.setEvento(reservaGuardada.getEvento());
+        ticketRepo.save(ticket);
 
         return reservaMapper.meppearDTO(reservaGuardada);
     }

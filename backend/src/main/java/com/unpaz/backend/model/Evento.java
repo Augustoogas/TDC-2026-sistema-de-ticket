@@ -1,5 +1,7 @@
 package com.unpaz.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -19,12 +21,14 @@ public class Evento {
     private String imagen;
     private String fecha;
 
-    @ManyToOne
+    @ManyToOne 
     @JoinColumn(name = "admin_id") 
+    @JsonIgnoreProperties("eventos")
     private Admin creador;
 
-    @ManyToOne // Agregamos esto para que no tire el error de Locacion
+    @ManyToOne
     @JoinColumn(name = "locacion_evento_id")
+    @JsonIgnoreProperties({"sectores", "eventos"})
     private Locacion locacion;
 
 }

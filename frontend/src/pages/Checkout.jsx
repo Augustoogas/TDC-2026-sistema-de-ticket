@@ -65,15 +65,15 @@ const Checkout = () => {
       return;
     }
 
-    try {
-      const reservaConfirmada = await PurchaseService.confirmReservation(reservaId);
+try {
+       const reservaConfirmada = await PurchaseService.confirmReservation(reservaId);
 
-      console.log('Reserva confirmada:', reservaConfirmada);
+       console.log('Reserva confirmada:', reservaConfirmada);
 
-      alert(`¡Reserva confirmada! ID: ${reservaConfirmada.reservaId}`);
+       alert(`¡Reserva confirmada! ID: ${reservaConfirmada.reservaId}`);
 
-      navigate('/');
-    } catch (error) {
+       navigate('/my-tickets');
+     } catch (error) {
       console.error(error);
       alert(`Error al procesar el pago: ${error.message}`);
     } finally {
