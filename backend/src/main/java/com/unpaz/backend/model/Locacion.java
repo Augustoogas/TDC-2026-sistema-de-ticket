@@ -26,5 +26,6 @@ public class Locacion {
 
     // para que la locacion se relacione con sectores
     @OneToMany(mappedBy = "locacion", cascade = CascadeType.ALL,orphanRemoval = true)
+    @OrderBy("precio DESC")
     private List<Sector> sectores;
 }
